@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Coding 知识库 · Knowledge Base</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Fira+Code:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #161922;
+    --bg-card: #1c2030;
+    --bg-code: #1a1e2e;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-green: #10b981;
+    --accent-orange: #f59e0b;
+    --accent-pink: #ec4899;
+    --accent-red: #ef4444;
+    --accent-cyan: #06b6d4;
+    --border-subtle: rgba(255,255,255,0.06);
+    --sidebar-width: 300px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.8;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ===== 侧边栏目录 ===== */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-subtle);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 30px 0;
+    z-index: 100;
+    transition: transform 0.3s ease;
+  }
+  .sidebar-header {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 16px;
+  }
+  .sidebar-header h2 {
+    font-size: 1.2em;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sidebar-header p {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+  .sidebar nav { padding: 0 12px; }
+  .sidebar .toc-chapter {
+    font-size: 0.8em;
+    color: var(--accent-purple);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 16px 12px 6px;
+  }
+  .sidebar a {
+    display: block;
+    padding: 7px 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9em;
+    border-radius: 8px;
+    transition: all 0.2s;
+    line-height: 1.5;
+  }
+  .sidebar a:hover { background: rgba(139,92,246,0.1); color: var(--text-primary); }
+  .sidebar a.active { background: rgba(139,92,246,0.15); color: var(--accent-purple); font-weight: 500; }
+
+  /* ===== 主内容区 ===== */
+  .main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    max-width: 900px;
+    padding: 50px 60px 100px;
+  }
+  .main-content h1 {
+    font-size: 2.4em;
+    font-weight: 900;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .main-content > .subtitle {
+    font-size: 1.15em;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 30px;
+  }
+
+  .chapter {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .chapter:first-of-type { margin-top: 30px; border-top: none; padding-top: 0; }
+  .chapter h2 {
+    font-size: 1.8em;
+    font-weight: 800;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .chapter h2 .ch-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 1.2em;
+    flex-shrink: 0;
+  }
+
+  .section { margin-top: 35px; }
+  .section h3 {
+    font-size: 1.3em;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    padding-left: 14px;
+    border-left: 3px solid var(--accent-purple);
+  }
+  .section h4 {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 20px 0 10px;
+    color: var(--accent-blue);
+  }
+  .section p, .section li { color: var(--text-secondary); line-height: 1.9; }
+  .section ul, .section ol { padding-left: 22px; margin: 10px 0; }
+  .section li { margin-bottom: 6px; }
+  .section strong, .section b { color: var(--text-primary); }
+
+  /* 代码块 */
+  pre.code {
+    background: var(--bg-code);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.88em;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  code {
+    font-family: 'Fira Code', monospace;
+    background: rgba(139,92,246,0.12);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 0.88em;
+    color: var(--accent-purple);
+  }
+  .cmd { color: var(--accent-green); }
+  .comment { color: #6b7280; }
+  .arg { color: var(--accent-orange); }
+  .str { color: #34d399; }
+
+  /* 提示框 */
+  .tip-box {
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin: 16px 0 22px;
+    font-size: 0.95em;
+    line-height: 1.7;
+  }
+  .tip-box.info { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); }
+  .tip-box.warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+  .tip-box.success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); }
+  .tip-box.danger { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+  .tip-box .tip-title { font-weight: 700; margin-bottom: 6px; }
+  .tip-box.info .tip-title { color: var(--accent-blue); }
+  .tip-box.warn .tip-title { color: var(--accent-orange); }
+  .tip-box.success .tip-title { color: var(--accent-green); }
+  .tip-box.danger .tip-title { color: var(--accent-red); }
+
+  /* 对比表格 */
+  table.kb-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    font-size: 0.95em;
+  }
+  table.kb-table th, table.kb-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+  }
+  table.kb-table th { color: var(--accent-purple); font-weight: 600; font-size: 0.9em; }
+  table.kb-table tr:hover td { background: rgba(139,92,246,0.04); }
+
+  /* 步骤卡片 */
+  .step-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 12px 0 16px;
+  }
+  .step-card .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .step-card .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    color: white;
+    font-weight: 700;
+    font-size: 0.85em;
+    flex-shrink: 0;
+  }
+  .step-card .step-title { font-weight: 700; font-size: 1.05em; }
+
+  /* 移动端菜单按钮 */
+  .menu-btn {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 200;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    font-size: 1.3em;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 回到顶部 */
+  .back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--accent-purple);
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(139,92,246,0.4);
+  }
+  .back-to-top.visible { opacity: 1; }
+
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .menu-btn { display: flex; }
+    .main-content { margin-left: 0; padding: 60px 24px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="menu-btn" id="menuBtn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+
+<!-- ===== 侧边栏 ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>📚 Vibe Coding 知识库</h2>
+    <p>教学支撑 · 学生巩固</p>
+  </div>
+  <nav>
+    <div class="toc-chapter">第一章 · 认知篇</div>
+    <a href="#ch1">1. AI编程与Vibe Coding</a>
+    <a href="#s1-1">1.1 AI编程发展历程</a>
+    <a href="#s1-2">1.2 什么是Vibe Coding</a>
+    <a href="#s1-3">1.3 Copilot vs Agent模式</a>
+    <a href="#s1-4">1.4 为什么学Vibe Coding</a>
+
+    <div class="toc-chapter">第二章 · 工具篇</div>
+    <a href="#ch2">2. TRAE 安装与使用</a>
+    <a href="#s2-1">2.1 TRAE是什么</a>
+    <a href="#s2-2">2.2 安装步骤</a>
+    <a href="#s2-3">2.3 界面介绍</a>
+    <a href="#s2-4">2.4 Agent模式 vs Chat模式</a>
+    <a href="#s2-5">2.5 第一个项目：个人介绍网页</a>
+
+    <div class="toc-chapter">第三章 · Prompt篇</div>
+    <a href="#ch3">3. Prompt Engineering</a>
+    <a href="#s3-1">3.1 好Prompt vs 坏Prompt</a>
+    <a href="#s3-2">3.2 5个核心技巧</a>
+    <a href="#s3-3">3.3 万能Prompt模板</a>
+    <a href="#s3-4">3.4 迭代对话技巧</a>
+
+    <div class="toc-chapter">第四章 · Git篇</div>
+    <a href="#ch4">4. Git版本控制</a>
+    <a href="#s4-1">4.1 为什么需要Git</a>
+    <a href="#s4-2">4.2 核心概念</a>
+    <a href="#s4-3">4.3 常用命令速查</a>
+    <a href="#s4-4">4.4 在TRAE中使用Git</a>
+    <a href="#s4-5">4.5 GitHub远程仓库</a>
+
+    <div class="toc-chapter">第五章 · 实战篇</div>
+    <a href="#ch5">5. 实战项目：智能记事本</a>
+    <a href="#s5-1">5.1 项目规划</a>
+    <a href="#s5-2">5.2 Step 1：基础版本</a>
+    <a href="#s5-3">5.3 Step 2：删除与持久化</a>
+    <a href="#s5-4">5.4 Step 3：搜索功能</a>
+    <a href="#s5-5">5.5 Step 4：美化界面</a>
+    <a href="#s5-6">5.6 Step 5：进阶功能</a>
+
+    <div class="toc-chapter">第六章 · 进阶篇</div>
+    <a href="#ch6">6. 进阶技巧与避坑指南</a>
+    <a href="#s6-1">6.1 先规划再动手</a>
+    <a href="#s6-2">6.2 分步开发</a>
+    <a href="#s6-3">6.3 四大常见翻车</a>
+    <a href="#s6-4">6.4 Debug技巧</a>
+
+    <div class="toc-chapter">第七章 · 部署篇</div>
+    <a href="#ch7">7. 项目部署上线</a>
+    <a href="#s7-1">7.1 静态页面部署</a>
+    <a href="#s7-2">7.2 GitHub Pages</a>
+    <a href="#s7-3">7.3 Vercel / Netlify</a>
+
+    <div class="toc-chapter">第八章 · 学习路径</div>
+    <a href="#ch8">8. 课后学习路径</a>
+    <a href="#s8-1">8.1 短期练手项目</a>
+    <a href="#s8-2">8.2 中期学习方向</a>
+    <a href="#s8-3">8.3 推荐资源</a>
+
+    <div class="toc-chapter">第九章 · 架构篇</div>
+    <a href="#ch9">9. 前后端分离</a>
+    <a href="#s9-1">9.1 什么是前后端分离</a>
+    <a href="#s9-2">9.2 优势与劣势</a>
+    <a href="#s9-3">9.3 实际案例对比</a>
+
+    <div class="toc-chapter">第十章 · 发布篇</div>
+    <a href="#ch10">10. App上架与小程序发布</a>
+    <a href="#s10-1">10.1 各平台上架流程</a>
+    <a href="#s10-2">10.2 编译环境要求</a>
+    <a href="#s10-3">10.3 个人版 vs 企业版</a>
+
+    <div class="toc-chapter">第十一章 · 工具对比篇</div>
+    <a href="#ch11">11. AI编程工具对比</a>
+    <a href="#s11-1">11.1 Claude Code</a>
+    <a href="#s11-2">11.2 OpenAI Codex / ChatGPT</a>
+    <a href="#s11-3">11.3 与TRAE的对比</a>
+    <a href="#s11-4">11.4 各工具限制</a>
+
+    <div class="toc-chapter">第十二章 · Token篇</div>
+    <a href="#ch12">12. Token与费用</a>
+    <a href="#s12-1">12.1 什么是Token</a>
+    <a href="#s12-2">12.2 费用计算实例</a>
+    <a href="#s12-3">12.3 免费 vs 付费方案</a>
+
+    <div class="toc-chapter">第十三章 · 阶梯篇</div>
+    <a href="#ch13">13. 开发阶梯：从HTML到App</a>
+    <a href="#s13-1">13.1 为什么先做单机HTML</a>
+    <a href="#s13-2">13.2 五级复杂度阶梯</a>
+    <a href="#s13-3">13.3 每级适合的工具</a>
+
+    <div class="toc-chapter">第十四章 · 选题篇</div>
+    <a href="#ch14">14. 更多选题方向</a>
+    <a href="#s14-1">14.1 生活工具类</a>
+    <a href="#s14-2">14.2 学习辅助类</a>
+    <a href="#s14-3">14.3 娱乐游戏类</a>
+    <a href="#s14-4">14.4 社交创意类</a>
+    <a href="#s14-5">14.5 数据可视化类</a>
+
+    <div class="toc-chapter">第十五章 · 课堂互动篇</div>
+    <a href="#ch15">15. 课堂互动Vibe Coding</a>
+    <a href="#s15-1">15.1 推荐工具与方案</a>
+    <a href="#s15-2">15.2 互动流程设计</a>
+    <a href="#s15-3">15.3 项目选择建议</a>
+
+    <div class="toc-chapter">第十六章 · 趣味篇</div>
+    <a href="#ch16">16. 让AI给自己写一封信</a>
+    <a href="#s16-1">16.1 可行性与玩法</a>
+    <a href="#s16-2">16.2 Prompt示例与效果</a>
+
+    <div class="toc-chapter">第十七章 · 教学篇</div>
+    <a href="#ch17">17. 无Git账号的教学方案</a>
+    <a href="#s17-1">17.1 替代方案</a>
+    <a href="#s17-2">17.2 概念讲解策略</a>
+    <a href="#s17-3">17.3 课后再注册</a>
+
+    <div class="toc-chapter">第十八章 · 协作篇</div>
+    <a href="#ch18">18. 团队Vibe Coding分工</a>
+    <a href="#s18-1">18.1 角色分工模型</a>
+    <a href="#s18-2">18.2 协作工作流</a>
+    <a href="#s18-3">18.3 实战案例</a>
+
+    <div class="toc-chapter">附录</div>
+    <a href="#appendix-a">A. Prompt速查手册</a>
+    <a href="#appendix-b">B. Git命令速查表</a>
+    <a href="#appendix-c">C. 常见问题FAQ</a>
+  </nav>
+</aside>
+
+<!-- ===== 主内容 ===== -->
+<main class="main-content">
+
+<h1>Vibe Coding 知识库</h1>
+<p class="subtitle">从零到一的AI编程完整指南 · 配合微课堂使用</p>
+
+<!-- ========== 第一章 ========== -->
+<div class="chapter" id="ch1">
+  <h2><span class="ch-icon" style="background:rgba(59,130,246,0.15); color:var(--accent-blue);">🧠</span> 第一章：AI编程与Vibe Coding</h2>
+
+  <div class="section" id="s1-1">
+    <h3>1.1 AI编程发展历程</h3>
+    <table class="kb-table">
+      <tr><th>时间</th><th>事件</th><th>意义</th></tr>
+      <tr><td>2021年6月</td><td>GitHub Copilot 预览版发布</td><td>第一个AI代码补全工具</td></tr>
+      <tr><td>2022年11月</td><td>ChatGPT 横空出世</td><td>AI从实验室走向大众</td></tr>
+      <tr><td>2023年3月</td><td>GPT-4 发布</td><td>代码能力质的飞跃，能理解复杂需求</td></tr>
+      <tr><td>2024年</td><td>Cursor 爆火</td><td>AI IDE革命开始，编程方式巨变</td></tr>
+      <tr><td>2025年2月</td><td>Andrej Karpathy 提出 "Vibe Coding"</td><td>定义了AI编程新时代</td></tr>
+    </table>
+    <div class="tip-box info">
+      <div class="tip-title">💡 关键人物</div>
+      <p><b>Andrej Karpathy</b>：前OpenAI联合创始人、前特斯拉AI总监、Stanford CS博士。他在X（推特）上的一条推文，正式给这种新编程方式命名为 "Vibe Coding"。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s1-2">
+    <h3>1.2 什么是Vibe Coding</h3>
+    <p>Vibe Coding（氛围编程）是一种全新的编程方式：<b>你用自然语言描述需求，AI帮你写代码</b>。你不需要精通任何编程语言，只需要会"说话"。</p>
+    <table class="kb-table">
+      <tr><th>对比项</th><th>传统编程</th><th>Vibe Coding</th></tr>
+      <tr><td>核心技能</td><td>学语法、记API</td><td>描述需求、指导AI</td></tr>
+      <tr><td>写代码的人</td><td>你自己</td><td>AI写，你审查</td></tr>
+      <tr><td>Debug</td><td>自己查错</td><td>告诉AI现象，让AI修</td></tr>
+      <tr><td>学习周期</td><td>几个月到几年</td><td>几分钟入门</td></tr>
+      <tr><td>你的角色</td><td>程序员</td><td>导演（AI是编剧+演员）</td></tr>
+    </table>
+    <div class="tip-box success">
+      <div class="tip-title">✅ 一句话总结</div>
+      <p>Vibe Coding = 你是导演，AI是编剧+程序员。你说戏，AI干活。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s1-3">
+    <h3>1.3 Copilot vs Agent 模式</h3>
+    <table class="kb-table">
+      <tr><th>特性</th><th>Copilot（副驾驶）</th><th>Agent（智能体）</th></tr>
+      <tr><td>工作方式</td><td>你在写代码，AI帮你补全</td><td>你描述需求，AI自己规划执行</td></tr>
+      <tr><td>类比</td><td>你在开车，AI帮你导航</td><td>AI在开车，你在导航</td></tr>
+      <tr><td>能力范围</td><td>代码补全、建议</td><td>创建文件、写代码、运行、修Bug</td></tr>
+      <tr><td>代表工具</td><td>GitHub Copilot</td><td><b>TRAE</b>、Cursor、Windsurf</td></tr>
+    </table>
+    <p>本课程使用的是 <b>Agent模式</b>，这才是真正的Vibe Coding。</p>
+  </div>
+
+  <div class="section" id="s1-4">
+    <h3>1.4 为什么学Vibe Coding</h3>
+    <ul>
+      <li><b>10倍效率提升</b>：以前一周的项目，现在可能一天搞定</li>
+      <li><b>就业竞争力</b>：企业正在招"会用AI编程的人"，这正在变成必备技能</li>
+      <li><b>实现你的想法</b>：有APP想法？小工具？小游戏？现在你可以自己做出来</li>
+      <li><b>门槛极低</b>：不需要精通编程语言，会描述需求就能开始</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== 第二章 ========== -->
+<div class="chapter" id="ch2">
+  <h2><span class="ch-icon" style="background:rgba(16,185,129,0.15); color:var(--accent-green);">🛠️</span> 第二章：TRAE 安装与使用</h2>
+
+  <div class="section" id="s2-1">
+    <h3>2.1 TRAE是什么</h3>
+    <table class="kb-table">
+      <tr><th>特性</th><th>说明</th></tr>
+      <tr><td>💰 价格</td><td><b>完全免费</b></td></tr>
+      <tr><td>🏠 出品</td><td>字节跳动（国内直连，无需翻墙）</td></tr>
+      <tr><td>🌐 语言</td><td>中文界面，中文对话</td></tr>
+      <tr><td>🤖 AI模型</td><td>内置，无需配置API Key</td></tr>
+      <tr><td>🔧 基础</td><td>基于VS Code（学了TRAE等于学了VS Code）</td></tr>
+      <tr><td>🧠 模式</td><td>支持Agent模式 + Chat模式</td></tr>
+    </table>
+    <div class="tip-box info">
+      <div class="tip-title">💡 为什么不用Cursor？</div>
+      <p>Cursor是最流行的AI IDE，但部分功能要付费。TRAE完全免费，国内无障碍使用，更适合教学场景。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s2-2">
+    <h3>2.2 安装步骤</h3>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">1</span><span class="step-title">下载安装包</span></div>
+      <p>打开浏览器，访问 <b>trae.ai</b>，点击下载按钮（支持Windows / macOS）</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">2</span><span class="step-title">安装TRAE</span></div>
+      <p>双击安装包，一路"下一步"，等待安装完成。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">3</span><span class="step-title">登录账号</span></div>
+      <p>打开TRAE，用字节跳动账号登录（可以用手机号注册），登录后AI功能自动激活。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">4</span><span class="step-title">创建项目文件夹</span></div>
+      <p>在电脑上创建一个专门的文件夹，比如 <code>我的项目</code>，然后在TRAE中 "打开文件夹" 选择它。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s2-3">
+    <h3>2.3 界面介绍</h3>
+    <table class="kb-table">
+      <tr><th>区域</th><th>位置</th><th>用途</th></tr>
+      <tr><td>文件管理器</td><td>左侧面板</td><td>查看和管理项目文件</td></tr>
+      <tr><td>代码编辑器</td><td>中央区域</td><td>编辑代码文件</td></tr>
+      <tr><td>AI面板</td><td>右侧面板</td><td>与AI对话、发送指令</td></tr>
+      <tr><td>终端</td><td>底部面板</td><td>运行命令（Ctrl + `）</td></tr>
+      <tr><td>Git面板</td><td>左侧图标</td><td>版本控制操作</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s2-4">
+    <h3>2.4 Agent模式 vs Chat模式</h3>
+    <table class="kb-table">
+      <tr><th>特性</th><th>Agent模式</th><th>Chat模式</th></tr>
+      <tr><td>功能</td><td>AI自动创建/修改文件、运行命令</td><td>AI只回答问题，不修改文件</td></tr>
+      <tr><td>适用场景</td><td>做项目、写代码、改Bug</td><td>问问题、学知识、讨论方案</td></tr>
+      <tr><td>你需要做</td><td>描述需求，审查AI的操作</td><td>提出问题，阅读AI的回答</td></tr>
+    </table>
+    <div class="tip-box warn">
+      <div class="tip-title">⚠️ 建议</div>
+      <p>做项目时用 <b>Agent模式</b>，这样AI可以直接帮你写代码和创建文件。问问题时用 <b>Chat模式</b>。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s2-5">
+    <h3>2.5 第一个项目：个人介绍网页</h3>
+    <h4>操作步骤</h4>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">1</span><span class="step-title">打开Agent模式</span></div>
+      <p>在TRAE右侧AI面板中，确认选择的是 <b>Agent</b> 模式。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">2</span><span class="step-title">发送Prompt</span></div>
+      <p>在AI面板中输入：</p>
+      <pre class="code">帮我创建一个个人介绍网页，要求：
+1. 单个HTML文件
+2. 深色主题，现代简约风格
+3. 包含：名字、照片占位符、自我介绍、兴趣爱好、联系方式
+4. 有好看的动画效果
+5. 响应式设计，手机也能看</pre>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">3</span><span class="step-title">预览效果</span></div>
+      <p>AI生成代码后，右键点击HTML文件 → "Open with Live Server" 或直接在浏览器中打开。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">4</span><span class="step-title">迭代修改</span></div>
+      <p>不满意？继续告诉AI修改，比如：</p>
+      <pre class="code">把背景色改成深蓝色，名字用渐变色效果
+加上一个"我的技能"区域，用进度条的形式展示</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第三章 ========== -->
+<div class="chapter" id="ch3">
+  <h2><span class="ch-icon" style="background:rgba(245,158,11,0.15); color:var(--accent-orange);">🗣️</span> 第三章：Prompt Engineering</h2>
+
+  <div class="section" id="s3-1">
+    <h3>3.1 好Prompt vs 坏Prompt</h3>
+    <table class="kb-table">
+      <tr><th>坏 Prompt ❌</th><th>好 Prompt ✅</th></tr>
+      <tr><td>"帮我做一个网站"</td><td>"帮我做一个待办事项网页：单个HTML文件，可以添加/删除任务，深色主题，数据保存在浏览器本地"</td></tr>
+      <tr><td>"代码有Bug"</td><td>"点击添加按钮后，任务没有出现在列表里，但控制台没有报错"</td></tr>
+      <tr><td>"优化一下"</td><td>"给每个任务卡片加悬停效果，添加任务时有淡入动画"</td></tr>
+    </table>
+    <div class="tip-box success">
+      <div class="tip-title">✅ 核心原则</div>
+      <p>像跟同事描述需求一样跟AI说话——<b>越具体，结果越好</b>。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s3-2">
+    <h3>3.2 5个核心技巧</h3>
+    <ol>
+      <li><b>说清楚"要什么"</b>：描述功能、外观、技术要求。不要说"怎么做"，让AI自己决定实现方式。</li>
+      <li><b>给上下文</b>：告诉AI项目背景、使用场景、目标用户。如"这是给大学生用的课程表应用"。</li>
+      <li><b>一次一件事</b>：不要一口气提20个需求。先做核心功能，再逐步添加。</li>
+      <li><b>用例子说明</b>：如"类似微信读书的书架页面"、"参考苹果官网的简约风格"。</li>
+      <li><b>不满意就迭代</b>：告诉AI哪里不对，让它改。对话轮次不限！</li>
+    </ol>
+  </div>
+
+  <div class="section" id="s3-3">
+    <h3>3.3 万能Prompt模板</h3>
+    <pre class="code">我想做一个 <span class="arg">[项目类型]</span>，具体要求如下：
+
+<span class="str">功能需求：</span>
+- [核心功能1]
+- [核心功能2]
+- [核心功能3]
+
+<span class="str">技术要求：</span>
+- [用什么技术，如：单个HTML文件]
+- [数据存储方式，如：localStorage]
+
+<span class="str">设计要求：</span>
+- [风格，如：现代简约深色主题]
+- [参考，如：类似notion的设计风格]
+
+<span class="str">用户：</span>[谁会用，如：大学生]</pre>
+    <div class="tip-box info">
+      <div class="tip-title">💡 提示</div>
+      <p>不需要每次都填满所有字段，但越具体结果越好。这个模板几乎适用于任何Web项目。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s3-4">
+    <h3>3.4 迭代对话技巧</h3>
+    <h4>修改外观</h4>
+    <pre class="code">颜色太亮了，整体用深色背景，按钮用蓝紫渐变色</pre>
+    <h4>添加功能</h4>
+    <pre class="code">给每个任务加一个截止日期的功能，过期的任务标红</pre>
+    <h4>修复问题</h4>
+    <pre class="code">添加任务后输入框没有清空，而且新任务应该显示在最上面</pre>
+    <h4>优化体验</h4>
+    <pre class="code">输入框里按回车就能添加任务，不需要点按钮</pre>
+    <h4>让AI解释</h4>
+    <pre class="code">解释一下这段代码的第15行到第30行是做什么的</pre>
+  </div>
+</div>
+
+<!-- ========== 第四章 ========== -->
+<div class="chapter" id="ch4">
+  <h2><span class="ch-icon" style="background:rgba(139,92,246,0.15); color:var(--accent-purple);">⏳</span> 第四章：Git版本控制</h2>
+
+  <div class="section" id="s4-1">
+    <h3>4.1 为什么需要Git</h3>
+    <p>没有Git的世界：</p>
+    <pre class="code">我的项目/
+├── index.html
+├── index_备份.html
+├── index_备份2.html
+├── index_备份_最终版.html
+├── index_备份_最终版_真的最终版.html
+└── index_我放弃了.html</pre>
+    <p>有Git的世界：</p>
+    <pre class="code">我的项目/
+└── index.html    <span class="comment">← 就一个文件，Git记住了每一次修改</span></pre>
+    <p><b>Git = 无限次Ctrl+Z + 完整的修改记录 + 多人协作</b></p>
+  </div>
+
+  <div class="section" id="s4-2">
+    <h3>4.2 核心概念</h3>
+    <table class="kb-table">
+      <tr><th>概念</th><th>类比</th><th>命令</th></tr>
+      <tr><td><b>仓库 (Repository)</b></td><td>你的项目文件夹，告诉Git"帮我管理这个文件夹"</td><td><code>git init</code></td></tr>
+      <tr><td><b>暂存 (Stage)</b></td><td>选好要拍快照的文件</td><td><code>git add .</code></td></tr>
+      <tr><td><b>提交 (Commit)</b></td><td>给项目拍一张"快照"，随时可回到这个状态</td><td><code>git commit -m "说明"</code></td></tr>
+      <tr><td><b>分支 (Branch)</b></td><td>平行宇宙，在分支上瞎搞不影响主线</td><td><code>git checkout -b 新功能</code></td></tr>
+      <tr><td><b>推送 (Push)</b></td><td>把快照上传到云端</td><td><code>git push</code></td></tr>
+    </table>
+    <div class="tip-box success">
+      <div class="tip-title">✅ 口诀</div>
+      <p>选文件（add）→ 拍快照（commit）→ 传云端（push）</p>
+    </div>
+  </div>
+
+  <div class="section" id="s4-3">
+    <h3>4.3 常用命令速查</h3>
+    <table class="kb-table">
+      <tr><th>命令</th><th>作用</th><th>使用场景</th></tr>
+      <tr><td><code>git init</code></td><td>初始化Git仓库</td><td>新项目第一次用Git</td></tr>
+      <tr><td><code>git add .</code></td><td>把所有文件加入暂存区</td><td>准备提交前</td></tr>
+      <tr><td><code>git commit -m "说明"</code></td><td>提交一次快照</td><td>完成一个功能后</td></tr>
+      <tr><td><code>git status</code></td><td>查看当前状态</td><td>看看有哪些文件改了</td></tr>
+      <tr><td><code>git log --oneline</code></td><td>查看提交历史</td><td>回顾之前做了什么</td></tr>
+      <tr><td><code>git push origin main</code></td><td>推送到远程</td><td>备份到GitHub</td></tr>
+      <tr><td><code>git pull</code></td><td>拉取远程最新</td><td>同步他人的修改</td></tr>
+      <tr><td><code>git checkout -- .</code></td><td>撤销未提交的修改</td><td>改坏了，想回到上次提交</td></tr>
+      <tr><td><code>git reset --hard HEAD~1</code></td><td>回退到上一次提交</td><td>提交错了，想撤销</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s4-4">
+    <h3>4.4 在TRAE中使用Git</h3>
+    <p>TRAE左侧有Git面板（分叉图标），支持图形化操作：</p>
+    <ul>
+      <li>点 <b>"+"</b> → 相当于 <code>git add</code></li>
+      <li>写备注，点 <b>"✓"</b> → 相当于 <code>git commit</code></li>
+      <li>点 <b>"推送"</b> → 相当于 <code>git push</code></li>
+    </ul>
+    <p>你也可以直接让AI帮你操作Git：</p>
+    <pre class="code">帮我把当前的代码提交到Git，备注写"完成基础布局"</pre>
+    <div class="tip-box info">
+      <div class="tip-title">💡 Vibe Coding时代的Git</div>
+      <p>AI连Git都能帮你操作。不用记命令，用自然语言就能完成版本控制。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s4-5">
+    <h3>4.5 GitHub远程仓库</h3>
+    <h4>创建GitHub仓库</h4>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">1</span><span class="step-title">注册GitHub账号</span></div>
+      <p>访问 <b>github.com</b>，用邮箱注册一个免费账号。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">2</span><span class="step-title">创建新仓库</span></div>
+      <p>点右上角 "+" → "New repository" → 输入项目名 → Create。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">3</span><span class="step-title">关联本地项目</span></div>
+      <pre class="code"><span class="cmd">git remote add</span> origin https://github.com/你的用户名/你的仓库名.git
+<span class="cmd">git push</span> -u origin main</pre>
+    </div>
+    <div class="tip-box warn">
+      <div class="tip-title">⚠️ 注意</div>
+      <p>第一次推送时需要GitHub登录认证。TRAE可能会弹出登录窗口，按提示操作即可。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第五章 ========== -->
+<div class="chapter" id="ch5">
+  <h2><span class="ch-icon" style="background:rgba(236,72,153,0.15); color:var(--accent-pink);">🚀</span> 第五章：实战项目——智能记事本</h2>
+
+  <div class="section" id="s5-1">
+    <h3>5.1 项目规划</h3>
+    <p><b>目标</b>：从零构建一个功能完整的Web记事本应用。</p>
+    <p><b>技术栈</b>：纯HTML + CSS + JavaScript（单文件）</p>
+    <p><b>核心功能</b>：</p>
+    <ul>
+      <li>✏️ 添加笔记（标题 + 内容）</li>
+      <li>🗑️ 删除笔记</li>
+      <li>🔍 搜索笔记</li>
+      <li>💾 数据自动保存（LocalStorage）</li>
+      <li>🎨 好看的深色主题界面</li>
+    </ul>
+    <p><b>开发节奏</b>：分5步迭代，每步完成后Git提交一次。</p>
+  </div>
+
+  <div class="section" id="s5-2">
+    <h3>5.2 Step 1：基础版本</h3>
+    <h4>Prompt</h4>
+    <pre class="code">帮我创建一个记事本Web应用，要求：
+1. 单个HTML文件（内联CSS和JavaScript）
+2. 深色主题设计，现代简约风格
+3. 功能：可以添加笔记（有标题和内容两个输入框），显示笔记列表
+4. 每条笔记显示创建时间
+5. 有一个基本的布局：顶部是标题，中间是输入区，下面是笔记列表</pre>
+    <h4>完成后</h4>
+    <pre class="code"><span class="cmd">git add</span> .
+<span class="cmd">git commit</span> -m <span class="str">"Step 1: 完成基础版本"</span></pre>
+  </div>
+
+  <div class="section" id="s5-3">
+    <h3>5.3 Step 2：删除与持久化</h3>
+    <h4>Prompt</h4>
+    <pre class="code">很好！现在请添加以下功能：
+1. 每条笔记旁边加一个删除按钮（红色X），点击可以删除
+2. 使用LocalStorage保存数据，刷新页面后笔记不会丢失
+3. 删除时有一个确认提示</pre>
+    <h4>验证</h4>
+    <ul>
+      <li>添加几条笔记 → 刷新页面 → 笔记还在 ✅</li>
+      <li>点击删除 → 弹出确认 → 删除成功 ✅</li>
+    </ul>
+    <h4>提交</h4>
+    <pre class="code"><span class="cmd">git commit</span> -am <span class="str">"Step 2: 添加删除和本地存储"</span></pre>
+  </div>
+
+  <div class="section" id="s5-4">
+    <h3>5.4 Step 3：搜索功能</h3>
+    <h4>Prompt</h4>
+    <pre class="code">再加一个搜索功能：
+1. 在笔记列表上方添加搜索框
+2. 输入关键词时实时过滤笔记（标题和内容都要搜）
+3. 搜索框有一个🔍图标
+4. 没有搜索结果时显示"没有找到相关笔记"</pre>
+    <h4>提交</h4>
+    <pre class="code"><span class="cmd">git commit</span> -am <span class="str">"Step 3: 添加搜索功能"</span></pre>
+  </div>
+
+  <div class="section" id="s5-5">
+    <h3>5.5 Step 4：美化界面</h3>
+    <h4>Prompt</h4>
+    <pre class="code">现在优化一下界面：
+1. 给笔记卡片添加悬停效果（阴影变化）
+2. 添加/删除笔记时有过渡动画
+3. 输入框获得焦点时有发光边框效果
+4. 页面顶部加一个渐变色标题栏
+5. 笔记按时间倒序排列（最新的在上面）</pre>
+    <h4>提交</h4>
+    <pre class="code"><span class="cmd">git commit</span> -am <span class="str">"Step 4: 美化界面"</span></pre>
+  </div>
+
+  <div class="section" id="s5-6">
+    <h3>5.6 Step 5：进阶功能（自由发挥）</h3>
+    <h4>可选功能</h4>
+    <pre class="code">最后，帮我再加这些功能：
+1. 笔记分类功能（可以给笔记打标签，如"学习"、"生活"、"工作"）
+2. 按分类过滤笔记
+3. 笔记可以编辑（点击笔记可以修改内容）
+4. 加一个笔记数量统计显示在顶部</pre>
+    <h4>更多挑战</h4>
+    <ul>
+      <li>✏️ 编辑功能：点击笔记可以修改</li>
+      <li>📌 置顶功能：重要笔记置顶</li>
+      <li>🌙 主题切换：深色/浅色模式</li>
+      <li>📤 导出功能：导出为文本文件</li>
+    </ul>
+    <h4>最终提交</h4>
+    <pre class="code"><span class="cmd">git commit</span> -am <span class="str">"Step 5: 完成智能记事本v1.0"</span>
+<span class="cmd">git push</span> origin main</pre>
+  </div>
+</div>
+
+<!-- ========== 第六章 ========== -->
+<div class="chapter" id="ch6">
+  <h2><span class="ch-icon" style="background:rgba(239,68,68,0.15); color:var(--accent-red);">🧠</span> 第六章：进阶技巧与避坑指南</h2>
+
+  <div class="section" id="s6-1">
+    <h3>6.1 先规划再动手</h3>
+    <div class="tip-box danger">
+      <div class="tip-title">❌ 新手做法</div>
+      <p>打开TRAE，直接说"帮我做一个XXX"。结果AI东一下西一下，越改越乱。</p>
+    </div>
+    <div class="tip-box success">
+      <div class="tip-title">✅ 进阶做法</div>
+      <p>先花5分钟想清楚：</p>
+      <ol>
+        <li>这个项目要<b>解决什么问题</b>？</li>
+        <li><b>核心功能</b>有哪些？（列3-5个）</li>
+        <li>先做哪个，后做哪个？（<b>排优先级</b>）</li>
+        <li>大概长什么样？（<b>画个草图</b>）</li>
+      </ol>
+    </div>
+    <p>甚至可以先让AI帮你规划：</p>
+    <pre class="code">我想做一个XXX，帮我列出功能清单和开发步骤</pre>
+  </div>
+
+  <div class="section" id="s6-2">
+    <h3>6.2 分步开发，小步快跑</h3>
+    <p><b>正确节奏</b>：</p>
+    <ol>
+      <li>做核心功能 → 测试 → <code>git commit</code></li>
+      <li>加一个功能 → 测试 → <code>git commit</code></li>
+      <li>美化UI → 测试 → <code>git commit</code></li>
+      <li>加进阶功能 → 测试 → <code>git commit</code></li>
+    </ol>
+    <div class="tip-box info">
+      <div class="tip-title">💡 金句</div>
+      <p>"Rome was not built in a day."<br>先让它能跑起来，再让它变好看，最后让它变强大。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s6-3">
+    <h3>6.3 四大常见翻车</h3>
+    <table class="kb-table">
+      <tr><th>坑</th><th>现象</th><th>解法</th></tr>
+      <tr><td><b>🕳️ 越改越乱</b></td><td>改了10轮，代码一团糟</td><td>及时 git commit！改崩了就回滚到上一个好版本</td></tr>
+      <tr><td><b>🕳️ AI自说自话</b></td><td>AI加了一堆你没要的功能</td><td>Prompt明确说"只做XXX，不要加其他功能"</td></tr>
+      <tr><td><b>🕳️ 完全不看代码</b></td><td>AI写了有Bug的代码没发现</td><td>至少扫一眼生成的代码，看不懂的让AI解释</td></tr>
+      <tr><td><b>🕳️ 一次说太多</b></td><td>发了一大段需求，只做了一半</td><td>每次只提1-2个具体改动</td></tr>
+    </table>
+    <div class="tip-box warn">
+      <div class="tip-title">⚠️ 三句话记住</div>
+      <ol>
+        <li>🧠 <b>先想清楚再开始</b>（5分钟规划省30分钟修改）</li>
+        <li>📦 <b>大任务拆小步骤</b>（一次一个功能，步步为营）</li>
+        <li>🔍 <b>每一步都验证效果</b>（不要盲目信任AI）</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section" id="s6-4">
+    <h3>6.4 Debug技巧</h3>
+    <h4>技巧1：把错误信息直接发给AI</h4>
+    <pre class="code">这段代码运行后报了这个错误：
+[粘贴完整的报错信息]
+帮我修复一下</pre>
+
+    <h4>技巧2：描述"现象"而不是"猜测"</h4>
+    <pre class="code"><span class="comment">❌ 不好：</span>"JavaScript有bug"
+<span class="comment">✅ 好：</span>"点击添加按钮后，笔记没有出现在列表里，但控制台没有报错"</pre>
+
+    <h4>技巧3：让AI解释代码</h4>
+    <pre class="code">解释一下这段代码是做什么的，特别是第15行到第30行</pre>
+
+    <h4>技巧4：实在搞不定？回滚重来</h4>
+    <pre class="code">帮我撤销上一次的修改，回到之前能用的版本</pre>
+    <div class="tip-box info">
+      <div class="tip-title">💡 按F12打开浏览器开发者工具</div>
+      <p>Console（控制台）标签页会显示JavaScript错误信息。把这些错误信息复制给AI，它能精准定位问题。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第七章 ========== -->
+<div class="chapter" id="ch7">
+  <h2><span class="ch-icon" style="background:rgba(16,185,129,0.15); color:var(--accent-green);">🌐</span> 第七章：项目部署上线</h2>
+
+  <div class="section" id="s7-1">
+    <h3>7.1 静态页面部署概述</h3>
+    <p>你做的HTML项目（如记事本、个人网页）都是<b>静态页面</b>，部署非常简单。这意味着不需要服务器端语言，只需要一个"文件托管服务"。</p>
+    <p><b>免费部署方案</b>：</p>
+    <ul>
+      <li>⭐ <b>GitHub Pages</b>：最简单，适合个人项目</li>
+      <li>⚡ <b>Vercel</b>：功能更强，支持自动部署</li>
+      <li>🌐 <b>Netlify</b>：和Vercel类似的替代方案</li>
+    </ul>
+  </div>
+
+  <div class="section" id="s7-2">
+    <h3>7.2 GitHub Pages 部署步骤</h3>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">1</span><span class="step-title">确保代码已推送到GitHub</span></div>
+      <pre class="code"><span class="cmd">git push</span> origin main</pre>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">2</span><span class="step-title">打开GitHub仓库设置</span></div>
+      <p>打开你的GitHub仓库页面 → 点 <b>Settings</b> → 左侧找到 <b>Pages</b></p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">3</span><span class="step-title">配置部署源</span></div>
+      <p>Source 选 <b>"Deploy from a branch"</b> → Branch 选 <b>main</b> → 点 Save</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">4</span><span class="step-title">等待部署完成</span></div>
+      <p>等1-2分钟，你的网站就上线了！访问地址：<code>https://你的用户名.github.io/仓库名/</code></p>
+    </div>
+    <div class="tip-box warn">
+      <div class="tip-title">⚠️ 注意</div>
+      <p>确保你的主HTML文件命名为 <code>index.html</code>，这样才能直接访问。如果有多个HTML文件，可以通过 <code>/文件名.html</code> 访问。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s7-3">
+    <h3>7.3 Vercel / Netlify 部署步骤</h3>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">1</span><span class="step-title">注册账号</span></div>
+      <p>访问 <b>vercel.com</b>（或 netlify.com），用GitHub账号一键登录。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">2</span><span class="step-title">导入GitHub仓库</span></div>
+      <p>点 "New Project" → 选择你的GitHub仓库 → 点 Deploy</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">3</span><span class="step-title">自动部署</span></div>
+      <p>之后每次你 <code>git push</code>，网站会<b>自动更新</b>。这就是最基本的CI/CD！</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第八章 ========== -->
+<div class="chapter" id="ch8">
+  <h2><span class="ch-icon" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan);">🗺️</span> 第八章：课后学习路径</h2>
+
+  <div class="section" id="s8-1">
+    <h3>8.1 短期练手项目（1-2周）</h3>
+    <p>每天花30分钟，用TRAE做一个小项目：</p>
+    <table class="kb-table">
+      <tr><th>难度</th><th>项目</th><th>核心知识点</th></tr>
+      <tr><td>⭐</td><td>猜数字游戏</td><td>基础交互、条件判断</td></tr>
+      <tr><td>⭐</td><td>番茄钟计时器</td><td>计时器、状态管理</td></tr>
+      <tr><td>⭐⭐</td><td>记账小应用</td><td>LocalStorage、数据统计</td></tr>
+      <tr><td>⭐⭐</td><td>习惯打卡器</td><td>日期处理、数据持久化</td></tr>
+      <tr><td>⭐⭐⭐</td><td>天气查询（调API）</td><td>网络请求、API调用</td></tr>
+      <tr><td>⭐⭐⭐</td><td>Markdown编辑器</td><td>文本解析、实时预览</td></tr>
+    </table>
+    <div class="tip-box success">
+      <div class="tip-title">✅ 建议</div>
+      <p>选一个你<b>真的想用</b>的东西来做，这样你会更有动力！</p>
+    </div>
+  </div>
+
+  <div class="section" id="s8-2">
+    <h3>8.2 中期学习方向（1-3个月）</h3>
+    <ul>
+      <li><b>🌐 前端基础</b>：了解HTML/CSS/JS的基本概念。推荐：MDN Web Docs、freeCodeCamp（免费）</li>
+      <li><b>🐍 Python + AI</b>：更适合做后端、数据分析、AI项目。用AI学Python也超快</li>
+      <li><b>⚛️ 前端框架</b>：学一个框架（React或Vue），做更复杂的应用</li>
+      <li><b>🗄️ 后端入门</b>：学Node.js或Python Flask，让你的应用有后端</li>
+    </ul>
+  </div>
+
+  <div class="section" id="s8-3">
+    <h3>8.3 推荐资源</h3>
+    <table class="kb-table">
+      <tr><th>类型</th><th>资源</th><th>说明</th></tr>
+      <tr><td>📖 文档</td><td>MDN Web Docs</td><td>最权威的Web技术文档（中文版）</td></tr>
+      <tr><td>🎓 课程</td><td>freeCodeCamp</td><td>免费在线编程课程，有中文</td></tr>
+      <tr><td>📺 视频</td><td>B站</td><td>搜"AI编程"、"Vibe Coding"</td></tr>
+      <tr><td>💬 社区</td><td>GitHub</td><td>看别人的开源项目，学习代码</td></tr>
+      <tr><td>💬 社区</td><td>掘金</td><td>中文技术社区，有大量前端教程</td></tr>
+      <tr><td>🛠️ 工具</td><td>TRAE</td><td>继续用TRAE练习Vibe Coding</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ========== 第九章 ========== -->
+<div class="chapter" id="ch9">
+  <h2><span class="ch-icon" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan);">🏗️</span> 第九章：前后端分离</h2>
+
+  <div class="section" id="s9-1">
+    <h3>9.1 什么是前后端分离</h3>
+    <p><b>前后端分离</b>是一种软件架构模式：把用户看到的界面（前端）和处理数据的服务器逻辑（后端）分成两个独立的项目，通过<b>API接口</b>通信。</p>
+    <table class="kb-table">
+      <tr><th>概念</th><th>类比</th><th>技术举例</th></tr>
+      <tr><td><b>前端</b></td><td>餐厅的大堂（菜单、装修、服务员）</td><td>HTML/CSS/JS、React、Vue、小程序</td></tr>
+      <tr><td><b>后端</b></td><td>餐厅的厨房（做菜、管库存、算账）</td><td>Node.js、Python、Java、Go</td></tr>
+      <tr><td><b>API接口</b></td><td>传菜窗口（前台和后厨的沟通方式）</td><td>REST API、GraphQL</td></tr>
+    </table>
+    <pre class="code"><span class="comment">// 未分离（传统模式）：</span>
+用户 → 服务器（同时生成页面 + 处理数据）→ 返回完整HTML页面
+
+<span class="comment">// 前后端分离：</span>
+用户 → 前端（浏览器渲染页面）←<span class="arg">API请求/响应</span>→ 后端（只处理数据）</pre>
+  </div>
+
+  <div class="section" id="s9-2">
+    <h3>9.2 优势与劣势</h3>
+    <h4>优势</h4>
+    <ul>
+      <li><b>独立开发</b>：前端和后端团队可以并行工作，互不阻塞</li>
+      <li><b>一套后端，多个前端</b>：同一个API可以同时服务网页、App、小程序</li>
+      <li><b>技术自由</b>：前端可以用React，后端可以用Python，各选最合适的</li>
+      <li><b>更好的用户体验</b>：页面不用整页刷新，像原生App一样流畅（SPA）</li>
+      <li><b>便于维护</b>：改前端不影响后端，反之亦然</li>
+    </ul>
+    <h4>劣势</h4>
+    <ul>
+      <li><b>复杂度增加</b>：需要设计API、处理跨域、管理两个项目</li>
+      <li><b>SEO不友好</b>：纯前端渲染的页面，搜索引擎不容易抓取（需要SSR解决）</li>
+      <li><b>首屏加载慢</b>：需要先下载JS框架再渲染页面</li>
+      <li><b>学习成本高</b>：对新手来说需要理解更多概念</li>
+    </ul>
+  </div>
+
+  <div class="section" id="s9-3">
+    <h3>9.3 实际案例对比：校园二手交易平台</h3>
+    <h4>未分离的做法（传统）</h4>
+    <pre class="code"><span class="comment">// 用户访问商品列表页</span>
+1. 浏览器请求 → 服务器
+2. 服务器查数据库，获取商品列表
+3. 服务器用模板引擎把数据"塞进"HTML
+4. 返回<b>完整的HTML页面</b>给浏览器
+5. 用户点击下一页 → 整个页面重新加载
+
+<span class="arg">问题：</span>
+- 想做App？后端逻辑全写在HTML模板里，没法复用
+- 想做小程序？再抄一遍后端代码
+- 页面每次操作都要整页刷新，体验差</pre>
+
+    <h4>前后端分离的做法</h4>
+    <pre class="code"><span class="comment">// 后端只提供API：</span>
+GET /api/products          → 返回商品JSON数据
+POST /api/products         → 发布新商品
+GET /api/products/123      → 获取商品详情
+
+<span class="comment">// 前端（网页版）：</span>
+React/Vue 调用API → 渲染商品列表 → 丝滑翻页
+
+<span class="comment">// 前端（微信小程序）：</span>
+小程序调用<b>同一套API</b> → 渲染小程序界面
+
+<span class="comment">// 前端（App）：</span>
+Flutter/React Native 调用<b>同一套API</b> → 渲染App界面
+
+<span class="arg">一套后端API，三个前端共用！</span></pre>
+
+    <div class="tip-box success">
+      <div class="tip-title">✅ 一句话总结</div>
+      <p>前后端分离 = 厨房和大堂分开经营。厨房只管做菜（API），大堂可以开很多家分店（网页、App、小程序），都从同一个厨房取菜。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第十章 ========== -->
+<div class="chapter" id="ch10">
+  <h2><span class="ch-icon" style="background:rgba(245,158,11,0.15); color:var(--accent-orange);">📱</span> 第十章：App上架与小程序发布</h2>
+
+  <div class="section" id="s10-1">
+    <h3>10.1 各平台上架流程</h3>
+
+    <h4>iOS App Store</h4>
+    <table class="kb-table">
+      <tr><th>步骤</th><th>内容</th><th>注意事项</th></tr>
+      <tr><td>1. 注册开发者账号</td><td>Apple Developer Program</td><td>个人 $99/年，企业 $299/年</td></tr>
+      <tr><td>2. 准备证书</td><td>创建开发证书、Provisioning Profile</td><td>需要Mac电脑操作</td></tr>
+      <tr><td>3. 开发与测试</td><td>用Xcode开发，TestFlight内测</td><td>必须用Mac + Xcode</td></tr>
+      <tr><td>4. 提交审核</td><td>通过App Store Connect提交</td><td>审核1-3天，可能被拒</td></tr>
+      <tr><td>5. 上架</td><td>审核通过后可选择上架时间</td><td>需要截图、描述、隐私政策</td></tr>
+    </table>
+
+    <h4>Android 应用商店</h4>
+    <table class="kb-table">
+      <tr><th>步骤</th><th>内容</th><th>注意事项</th></tr>
+      <tr><td>1. 注册开发者账号</td><td>Google Play Console</td><td>一次性 $25（国内需要翻墙）</td></tr>
+      <tr><td>2. 签名打包</td><td>生成签名密钥，打包APK/AAB</td><td>AAB是Google Play首选格式</td></tr>
+      <tr><td>3. 提交审核</td><td>上传到Google Play Console</td><td>审核几小时到几天</td></tr>
+      <tr><td>4. 国内渠道</td><td>华为、小米、OPPO、VIVO应用商店</td><td>每个商店需要单独注册和提交！</td></tr>
+    </table>
+    <div class="tip-box warn">
+      <div class="tip-title">⚠️ 国内Android特殊性</div>
+      <p>国内没有统一的Android商店。华为、小米、OPPO、VIVO、应用宝等每个都需要单独注册开发者账号并提交审核，非常繁琐。这也是很多人选择做小程序的原因之一。</p>
+    </div>
+
+    <h4>鸿蒙 HarmonyOS</h4>
+    <table class="kb-table">
+      <tr><th>步骤</th><th>内容</th><th>注意事项</th></tr>
+      <tr><td>1. 注册华为开发者</td><td>华为开发者联盟</td><td>个人免费，企业需认证</td></tr>
+      <tr><td>2. 开发</td><td>DevEco Studio（华为官方IDE）</td><td>ArkTS语言（类TypeScript）</td></tr>
+      <tr><td>3. 测试</td><td>真机或模拟器测试</td><td>需要华为手机调试</td></tr>
+      <tr><td>4. 上架</td><td>提交到华为AppGallery</td><td>审核1-5天</td></tr>
+    </table>
+
+    <h4>微信小程序</h4>
+    <table class="kb-table">
+      <tr><th>步骤</th><th>内容</th><th>注意事项</th></tr>
+      <tr><td>1. 注册小程序账号</td><td>微信公众平台 mp.weixin.qq.com</td><td>个人/企业均可注册</td></tr>
+      <tr><td>2. 开发</td><td>微信开发者工具</td><td>WXML + WXSS + JS（类似但不同于HTML/CSS/JS）</td></tr>
+      <tr><td>3. 云编译预览</td><td>微信开发者工具内置云编译</td><td>不需要本地环境，直接在工具内编译</td></tr>
+      <tr><td>4. 体验版测试</td><td>生成体验版二维码</td><td>最多可添加25个体验成员</td></tr>
+      <tr><td>5. 提交审核</td><td>在微信后台提交</td><td>审核1-7天，个人号限制更多类目</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s10-2">
+    <h3>10.2 编译环境要求</h3>
+    <table class="kb-table">
+      <tr><th>平台</th><th>IDE/工具</th><th>编译环境</th><th>系统要求</th></tr>
+      <tr><td><b>iOS</b></td><td>Xcode</td><td>本地编译（Mac专属）</td><td>macOS 13+ / Mac电脑（无法在Windows上开发！）</td></tr>
+      <tr><td><b>Android</b></td><td>Android Studio</td><td>本地编译（Gradle构建）</td><td>Windows/Mac/Linux，8GB+内存</td></tr>
+      <tr><td><b>鸿蒙</b></td><td>DevEco Studio</td><td>本地编译</td><td>Windows/Mac，8GB+内存</td></tr>
+      <tr><td><b>微信小程序</b></td><td>微信开发者工具</td><td><b>云编译</b>（微信服务器编译）</td><td>Windows/Mac，要求较低</td></tr>
+      <tr><td><b>跨平台</b></td><td>Flutter / React Native</td><td>本地编译（针对目标平台）</td><td>编iOS仍需Mac</td></tr>
+    </table>
+    <div class="tip-box info">
+      <div class="tip-title">💡 微信云编译的优势</div>
+      <p>微信小程序的<b>云编译</b>意味着你的代码上传到微信服务器上编译，不需要本地配置复杂的编译环境。这大大降低了开发门槛——你甚至可以用一台配置较低的电脑开发小程序。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s10-3">
+    <h3>10.3 个人版 vs 企业版</h3>
+    <table class="kb-table">
+      <tr><th>对比项</th><th>个人版</th><th>企业版</th></tr>
+      <tr><td><b>Apple开发者</b></td><td>$99/年，只能上个人应用</td><td>$299/年，可分发企业内部应用</td></tr>
+      <tr><td><b>Google Play</b></td><td>$25一次性，功能基本相同</td><td>组织账号，支持团队管理</td></tr>
+      <tr><td><b>微信小程序</b></td><td>免费，但类目受限（不能做电商、直播、支付等）</td><td>免费但需要营业执照认证，类目更多，支持微信支付</td></tr>
+      <tr><td><b>华为AppGallery</b></td><td>个人免费注册</td><td>企业需要营业执照认证</td></tr>
+    </table>
+    <div class="tip-box danger">
+      <div class="tip-title">❌ 个人版微信小程序的主要限制</div>
+      <ul>
+        <li>不能做<b>电商类</b>（不能卖东西）</li>
+        <li>不能接<b>微信支付</b></li>
+        <li>不能做<b>社交类</b>（不能有用户互动）</li>
+        <li>不能做<b>游戏类</b>（需要版号）</li>
+        <li>可选的<b>服务类目很少</b>（工具、教育等少数类目可以）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第十一章 ========== -->
+<div class="chapter" id="ch11">
+  <h2><span class="ch-icon" style="background:rgba(139,92,246,0.15); color:var(--accent-purple);">🤖</span> 第十一章：AI编程工具对比</h2>
+
+  <div class="section" id="s11-1">
+    <h3>11.1 Claude Code</h3>
+    <p><b>Claude Code</b> 是 Anthropic 公司（Claude AI 的开发商）推出的命令行AI编程工具。它不是IDE，而是一个在终端中运行的<b>AI编程代理</b>。</p>
+    <table class="kb-table">
+      <tr><th>特性</th><th>说明</th></tr>
+      <tr><td>工作方式</td><td>在终端（命令行）中运行，AI直接读写你的代码文件</td></tr>
+      <tr><td>核心能力</td><td>理解整个项目结构、跨文件修改、运行命令、自动Debug</td></tr>
+      <tr><td>模型</td><td>Claude Sonnet / Opus（Anthropic自家最强模型）</td></tr>
+      <tr><td>定价</td><td>按Token收费（通过Anthropic API），或Max订阅 $100-200/月</td></tr>
+      <tr><td>优势</td><td>代码理解能力极强，上下文窗口大（200K token），适合大项目</td></tr>
+      <tr><td>劣势</td><td>纯命令行界面，没有可视化编辑器，新手不友好</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s11-2">
+    <h3>11.2 OpenAI Codex / ChatGPT</h3>
+    <p><b>Codex</b>（又称 codex-cli）是OpenAI推出的命令行AI编程工具，类似Claude Code。ChatGPT本身也可以用来写代码。</p>
+    <table class="kb-table">
+      <tr><th>特性</th><th>说明</th></tr>
+      <tr><td>Codex CLI</td><td>开源命令行工具，在终端中运行，AI读写文件和执行命令</td></tr>
+      <tr><td>ChatGPT代码能力</td><td>在ChatGPT网页/App中直接对话写代码，可以用Canvas功能编辑</td></tr>
+      <tr><td>模型</td><td>GPT-4o / o3（OpenAI最新模型）</td></tr>
+      <tr><td>定价</td><td>Codex CLI 按API Token收费；ChatGPT Plus $20/月可用GPT-4o</td></tr>
+      <tr><td>优势</td><td>GPT-4系列模型综合能力强，生态成熟</td></tr>
+      <tr><td>劣势</td><td>API较贵，codex-cli仍是早期产品</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s11-3">
+    <h3>11.3 与TRAE的对比</h3>
+    <table class="kb-table">
+      <tr><th>对比项</th><th>TRAE</th><th>Claude Code</th><th>Codex CLI</th><th>Cursor</th></tr>
+      <tr><td><b>费用</b></td><td>完全免费</td><td>付费（$100+/月）</td><td>付费（按Token）</td><td>免费额度 + $20/月</td></tr>
+      <tr><td><b>界面</b></td><td>VS Code风格IDE</td><td>纯命令行</td><td>纯命令行</td><td>VS Code风格IDE</td></tr>
+      <tr><td><b>国内可用</b></td><td>直连，无障碍</td><td>需翻墙</td><td>需翻墙</td><td>需翻墙</td></tr>
+      <tr><td><b>中文</b></td><td>原生支持</td><td>支持但英文优先</td><td>支持但英文优先</td><td>支持但英文优先</td></tr>
+      <tr><td><b>上手难度</b></td><td>低（图形界面）</td><td>高（需要终端经验）</td><td>高（需要终端经验）</td><td>中</td></tr>
+      <tr><td><b>Agent能力</b></td><td>内置Agent模式</td><td>天然Agent</td><td>天然Agent</td><td>Agent + Copilot</td></tr>
+      <tr><td><b>适合人群</b></td><td>学生、初学者</td><td>专业开发者</td><td>专业开发者</td><td>有经验的开发者</td></tr>
+    </table>
+    <div class="tip-box success">
+      <div class="tip-title">✅ 选择建议</div>
+      <p><b>学生/初学者</b>：选TRAE（免费 + 中文 + 图形界面）<br><b>有经验想进阶</b>：试试Cursor（平衡体验）<br><b>专业开发者</b>：Claude Code 或 Codex（更强大但门槛更高）</p>
+    </div>
+  </div>
+
+  <div class="section" id="s11-4">
+    <h3>11.4 各工具的限制</h3>
+    <table class="kb-table">
+      <tr><th>工具</th><th>主要限制</th></tr>
+      <tr><td><b>TRAE</b></td><td>模型能力相对Claude/GPT-4略弱；生态插件比VS Code少；偶尔响应慢</td></tr>
+      <tr><td><b>Claude Code</b></td><td>贵（$100+/月）；纯命令行；需翻墙；API有速率限制</td></tr>
+      <tr><td><b>Codex CLI</b></td><td>较新较不稳定；API按量计费容易超预算；需翻墙</td></tr>
+      <tr><td><b>Cursor</b></td><td>免费额度有限（约每月500次快速请求）；付费$20/月；需翻墙</td></tr>
+      <tr><td><b>GitHub Copilot</b></td><td>$10/月（学生免费）；主要是补全不是Agent；需翻墙</td></tr>
+    </table>
+    <div class="tip-box warn">
+      <div class="tip-title">⚠️ 所有AI编程工具的共同限制</div>
+      <ul>
+        <li><b>不是万能的</b>：复杂业务逻辑、性能优化、安全问题仍需人工把关</li>
+        <li><b>会"幻觉"</b>：AI可能自信地写出错误代码或虚构不存在的API</li>
+        <li><b>上下文有限</b>：项目太大时AI可能"忘记"之前的代码</li>
+        <li><b>不稳定</b>：同样的Prompt，不同时间可能得到不同结果</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第十二章 ========== -->
+<div class="chapter" id="ch12">
+  <h2><span class="ch-icon" style="background:rgba(16,185,129,0.15); color:var(--accent-green);">🪙</span> 第十二章：Token与费用</h2>
+
+  <div class="section" id="s12-1">
+    <h3>12.1 什么是Token</h3>
+    <p><b>Token</b> 是AI模型处理文本的基本单位。你可以理解为"词块"——大约<b>1个中文字 ≈ 1-2个Token</b>，<b>1个英文单词 ≈ 1个Token</b>。</p>
+    <pre class="code"><span class="comment">// Token计算示例：</span>
+"Hello, world!"              → 约 4 个 Token
+"你好，世界！"               → 约 6 个 Token
+一段200行的Python代码         → 约 2000-4000 个 Token
+一个完整的HTML网页（500行）   → 约 3000-6000 个 Token</pre>
+    <p>AI对话时，<b>输入（你的Prompt + 上下文）</b>和<b>输出（AI的回答）</b>都消耗Token。</p>
+    <div class="tip-box info">
+      <div class="tip-title">💡 上下文窗口</div>
+      <p>每个AI模型有一个"上下文窗口"限制——就是一次对话能处理的最大Token数。GPT-4o约128K Token，Claude约200K Token。超过限制，AI就会"忘记"前面的内容。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s12-2">
+    <h3>12.2 费用计算实例</h3>
+    <h4>场景：用AI做一个待办事项Web应用</h4>
+    <table class="kb-table">
+      <tr><th>步骤</th><th>输入Token</th><th>输出Token</th><th>GPT-4o费用</th><th>Claude Sonnet费用</th></tr>
+      <tr><td>初始Prompt + 生成代码</td><td>~500</td><td>~3,000</td><td>~$0.05</td><td>~$0.01</td></tr>
+      <tr><td>5轮修改迭代</td><td>~5,000</td><td>~8,000</td><td>~$0.15</td><td>~$0.04</td></tr>
+      <tr><td>Debug 3次</td><td>~3,000</td><td>~4,000</td><td>~$0.10</td><td>~$0.03</td></tr>
+      <tr><td>添加进阶功能</td><td>~2,000</td><td>~5,000</td><td>~$0.10</td><td>~$0.03</td></tr>
+      <tr><td><b>总计</b></td><td><b>~10,500</b></td><td><b>~20,000</b></td><td><b>~$0.40</b></td><td><b>~$0.11</b></td></tr>
+    </table>
+    <p>一个简单项目大约花费<b>几毛钱人民币</b>——非常便宜。但如果是大型项目，几十上百轮对话下来可能花费几十美元。</p>
+
+    <h4>各平台Token价格参考（2025年中）</h4>
+    <table class="kb-table">
+      <tr><th>模型</th><th>输入价格（每百万Token）</th><th>输出价格（每百万Token）</th></tr>
+      <tr><td>GPT-4o</td><td>$2.50</td><td>$10.00</td></tr>
+      <tr><td>GPT-4o-mini</td><td>$0.15</td><td>$0.60</td></tr>
+      <tr><td>Claude Sonnet 4</td><td>$3.00</td><td>$15.00</td></tr>
+      <tr><td>Claude Haiku</td><td>$0.25</td><td>$1.25</td></tr>
+      <tr><td>DeepSeek V3</td><td>$0.27</td><td>$1.10</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s12-3">
+    <h3>12.3 免费 vs 付费方案</h3>
+    <table class="kb-table">
+      <tr><th>方案</th><th>费用</th><th>Token限制</th><th>适合</th></tr>
+      <tr><td><b>TRAE</b></td><td>免费</td><td>无显式限制（字节补贴）</td><td>学生、初学者</td></tr>
+      <tr><td><b>ChatGPT Free</b></td><td>免费</td><td>有限次数GPT-4o</td><td>偶尔使用</td></tr>
+      <tr><td><b>ChatGPT Plus</b></td><td>$20/月</td><td>更多GPT-4o额度</td><td>个人高频使用</td></tr>
+      <tr><td><b>Claude Free</b></td><td>免费</td><td>有限次数对话</td><td>偶尔使用</td></tr>
+      <tr><td><b>Claude Pro</b></td><td>$20/月</td><td>更多Sonnet额度</td><td>个人高频使用</td></tr>
+      <tr><td><b>API按量付费</b></td><td>按Token计费</td><td>无限（有余额就行）</td><td>开发者、企业</td></tr>
+    </table>
+    <div class="tip-box success">
+      <div class="tip-title">✅ 学生建议</div>
+      <p>用<b>TRAE</b>（完全免费）做项目 + <b>ChatGPT/Claude免费版</b>问问题。零成本就能完成本课程所有内容！</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第十三章 ========== -->
+<div class="chapter" id="ch13">
+  <h2><span class="ch-icon" style="background:rgba(236,72,153,0.15); color:var(--accent-pink);">🪜</span> 第十三章：开发阶梯——从HTML到App</h2>
+
+  <div class="section" id="s13-1">
+    <h3>13.1 为什么先做单机HTML</h3>
+    <p>很多同学会问："为什么不直接做App或小程序？" 答案是<b>复杂度阶梯</b>。</p>
+    <table class="kb-table">
+      <tr><th>直接做App的障碍</th><th>先做HTML的好处</th></tr>
+      <tr><td>需要安装开发环境（Xcode/Android Studio/Node.js等）</td><td>双击HTML就能打开，零配置</td></tr>
+      <tr><td>需要理解项目结构、包管理、编译流程</td><td>一个文件搞定一切</td></tr>
+      <tr><td>出了Bug很难定位（框架错误 vs 业务错误 vs 配置错误）</td><td>按F12就能看到所有错误</td></tr>
+      <tr><td>首次运行可能需要30分钟配环境</td><td>写完立刻看效果，成就感爆棚</td></tr>
+      <tr><td>多个概念同时学（组件、状态、路由、API...）</td><td>专注学一件事：如何与AI协作</td></tr>
+    </table>
+    <div class="tip-box info">
+      <div class="tip-title">💡 核心理念</div>
+      <p>先学会开车（AI编程），再学修车（框架、架构）。单机HTML让你<b>专注于Vibe Coding的核心技能</b>——与AI沟通，而不是被工具链搞疯。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s13-2">
+    <h3>13.2 五级复杂度阶梯</h3>
+    <table class="kb-table">
+      <tr><th>级别</th><th>类型</th><th>复杂度</th><th>需要的技能</th><th>示例</th></tr>
+      <tr><td><b>Lv.1</b></td><td>单机HTML页面</td><td>⭐</td><td>HTML/CSS/JS基础，LocalStorage</td><td>个人简历、记事本、计算器</td></tr>
+      <tr><td><b>Lv.2</b></td><td>带API的网页应用</td><td>⭐⭐</td><td>Lv.1 + 网络请求、API调用</td><td>天气查询、翻译工具、新闻聚合</td></tr>
+      <tr><td><b>Lv.3</b></td><td>微信小程序</td><td>⭐⭐⭐</td><td>Lv.2 + 小程序框架、微信API</td><td>校园工具、打卡小程序</td></tr>
+      <tr><td><b>Lv.4</b></td><td>前后端分离Web应用</td><td>⭐⭐⭐⭐</td><td>Lv.2 + 后端开发、数据库、部署</td><td>博客系统、在线商城、社交平台</td></tr>
+      <tr><td><b>Lv.5</b></td><td>跨平台App</td><td>⭐⭐⭐⭐⭐</td><td>Lv.4 + 移动端框架、原生API</td><td>社交App、外卖平台、直播应用</td></tr>
+    </table>
+    <pre class="code"><span class="comment">// 推荐学习路径：</span>
+
+Lv.1 单机HTML     <span class="arg">← 本课程在这里（1-2天上手）</span>
+  │
+  ▼ 学会调用免费API
+Lv.2 带API网页     <span class="arg">← 课后自学（1-2周）</span>
+  │
+  ├─▶ Lv.3 微信小程序  <span class="arg">← 想做移动端的选这条路（2-4周）</span>
+  │
+  ▼ 学后端（Node.js/Python）
+Lv.4 全栈Web应用   <span class="arg">← 想做完整产品的选这条路（1-3月）</span>
+  │
+  ▼ 学Flutter/React Native
+Lv.5 跨平台App     <span class="arg">← 进阶方向（3-6月）</span></pre>
+  </div>
+
+  <div class="section" id="s13-3">
+    <h3>13.3 每级适合的工具</h3>
+    <table class="kb-table">
+      <tr><th>级别</th><th>推荐工具</th><th>理由</th></tr>
+      <tr><td>Lv.1 HTML</td><td>TRAE + 浏览器</td><td>零配置，立即看效果</td></tr>
+      <tr><td>Lv.2 API网页</td><td>TRAE + 浏览器</td><td>同上，加上学API调用</td></tr>
+      <tr><td>Lv.3 小程序</td><td>微信开发者工具</td><td>官方工具，云编译，门槛低</td></tr>
+      <tr><td>Lv.4 全栈</td><td>TRAE/Cursor + Node.js/Python</td><td>需要安装运行环境</td></tr>
+      <tr><td>Lv.5 App</td><td>Cursor/Claude Code + Flutter/Xcode/Android Studio</td><td>需要更强大的AI + 原生工具链</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ========== 第十四章 ========== -->
+<div class="chapter" id="ch14">
+  <h2><span class="ch-icon" style="background:rgba(59,130,246,0.15); color:var(--accent-blue);">💡</span> 第十四章：更多选题方向与题目</h2>
+
+  <div class="section" id="s14-1">
+    <h3>14.1 生活工具类</h3>
+    <table class="kb-table">
+      <tr><th>难度</th><th>项目名</th><th>功能描述</th></tr>
+      <tr><td>⭐</td><td>AA记账器</td><td>多人聚餐后自动算每人该付多少钱</td></tr>
+      <tr><td>⭐</td><td>倒数日</td><td>设置重要日期（考试、生日），显示还剩几天</td></tr>
+      <tr><td>⭐</td><td>随机点名器</td><td>输入名单，随机抽取，可用于课堂</td></tr>
+      <tr><td>⭐⭐</td><td>每日菜谱推荐</td><td>输入食材，AI推荐菜谱（可调API）</td></tr>
+      <tr><td>⭐⭐</td><td>快递价格比较器</td><td>输入重量和目的地，对比各快递公司价格</td></tr>
+      <tr><td>⭐⭐</td><td>室友值日排班表</td><td>自动生成每周值日安排，支持换班</td></tr>
+      <tr><td>⭐⭐⭐</td><td>个人财务看板</td><td>记录收入支出，生成月度图表分析</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s14-2">
+    <h3>14.2 学习辅助类</h3>
+    <table class="kb-table">
+      <tr><th>难度</th><th>项目名</th><th>功能描述</th></tr>
+      <tr><td>⭐</td><td>Markdown笔记</td><td>支持Markdown格式的在线笔记本</td></tr>
+      <tr><td>⭐</td><td>番茄钟</td><td>25分钟专注 + 5分钟休息，循环计时</td></tr>
+      <tr><td>⭐⭐</td><td>单词卡片</td><td>背单词卡片翻转效果，记录已掌握/未掌握</td></tr>
+      <tr><td>⭐⭐</td><td>课程表</td><td>周视图课程表，可添加/删除课程，颜色区分</td></tr>
+      <tr><td>⭐⭐</td><td>考试倒计时看板</td><td>多科目考试倒计时，附带复习清单</td></tr>
+      <tr><td>⭐⭐⭐</td><td>错题本</td><td>按科目记录错题，支持图片粘贴，标记已复习</td></tr>
+      <tr><td>⭐⭐⭐</td><td>GPA计算器</td><td>输入课程和成绩，自动计算GPA和排名预测</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s14-3">
+    <h3>14.3 娱乐游戏类</h3>
+    <table class="kb-table">
+      <tr><th>难度</th><th>项目名</th><th>功能描述</th></tr>
+      <tr><td>⭐</td><td>猜数字</td><td>经典猜数字游戏，有提示"大了/小了"</td></tr>
+      <tr><td>⭐</td><td>石头剪刀布</td><td>和电脑对战，统计胜率</td></tr>
+      <tr><td>⭐⭐</td><td>成语接龙</td><td>人机对战成语接龙（可用内置词库）</td></tr>
+      <tr><td>⭐⭐</td><td>2048小游戏</td><td>经典2048滑动合并数字游戏</td></tr>
+      <tr><td>⭐⭐</td><td>打字速度测试</td><td>随机显示文本，计算WPM和准确率</td></tr>
+      <tr><td>⭐⭐⭐</td><td>贪吃蛇</td><td>经典贪吃蛇，支持键盘和触屏操作</td></tr>
+      <tr><td>⭐⭐⭐</td><td>五子棋（人机对战）</td><td>简单AI对手，有悔棋功能</td></tr>
+      <tr><td>⭐⭐⭐</td><td>音乐节拍游戏</td><td>类似太鼓达人，按节拍点击</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s14-4">
+    <h3>14.4 社交创意类</h3>
+    <table class="kb-table">
+      <tr><th>难度</th><th>项目名</th><th>功能描述</th></tr>
+      <tr><td>⭐</td><td>表白墙</td><td>匿名发送表白/祝福，瀑布流展示</td></tr>
+      <tr><td>⭐⭐</td><td>校园地图导航</td><td>标注校园建筑，点击显示介绍和路线</td></tr>
+      <tr><td>⭐⭐</td><td>心情日记</td><td>每天记录心情和一句话，生成心情曲线</td></tr>
+      <tr><td>⭐⭐</td><td>匿名投票器</td><td>创建投票，分享链接，实时看结果</td></tr>
+      <tr><td>⭐⭐⭐</td><td>个人博客</td><td>支持写文章、分类、标签、搜索</td></tr>
+      <tr><td>⭐⭐⭐</td><td>活动报名系统</td><td>创建活动、报名、统计人数</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s14-5">
+    <h3>14.5 数据可视化类</h3>
+    <table class="kb-table">
+      <tr><th>难度</th><th>项目名</th><th>功能描述</th></tr>
+      <tr><td>⭐⭐</td><td>BMI计算器+图表</td><td>输入身高体重，计算BMI并用图表展示历史</td></tr>
+      <tr><td>⭐⭐</td><td>天气可视化</td><td>调用天气API，用图表展示7天温度走势</td></tr>
+      <tr><td>⭐⭐⭐</td><td>GitHub贡献热力图</td><td>类似GitHub的绿色方块图，记录每日学习时长</td></tr>
+      <tr><td>⭐⭐⭐</td><td>疫情/数据看板</td><td>从公开数据集获取数据，做可视化仪表盘</td></tr>
+      <tr><td>⭐⭐⭐</td><td>股票/基金走势图</td><td>调用免费金融API，画K线图和均线</td></tr>
+    </table>
+    <div class="tip-box success">
+      <div class="tip-title">✅ 选题技巧</div>
+      <p>选一个<b>你自己真的想用</b>的东西。"解决自己的问题"永远是最好的动力！</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第十五章 ========== -->
+<div class="chapter" id="ch15">
+  <h2><span class="ch-icon" style="background:rgba(245,158,11,0.15); color:var(--accent-orange);">🎓</span> 第十五章：课堂互动Vibe Coding</h2>
+
+  <div class="section" id="s15-1">
+    <h3>15.1 推荐工具与方案</h3>
+    <p>想在课堂上做一个项目，让学生<b>一人一句话</b>来Vibe Coding，说完立刻看到效果？推荐以下方案：</p>
+
+    <h4>方案一：TRAE（推荐）</h4>
+    <table class="kb-table">
+      <tr><th>优势</th><th>说明</th></tr>
+      <tr><td>所见即所得</td><td>AI写完代码，直接在浏览器预览效果</td></tr>
+      <tr><td>Agent模式</td><td>AI自动创建/修改文件，说一句话就能看到变化</td></tr>
+      <tr><td>投影演示</td><td>讲师操作，学生口述需求，大屏投影效果</td></tr>
+    </table>
+
+    <h4>方案二：bolt.new / v0.dev（在线平台）</h4>
+    <table class="kb-table">
+      <tr><th>优势</th><th>说明</th></tr>
+      <tr><td>零安装</td><td>打开浏览器就能用，无需安装任何东西</td></tr>
+      <tr><td>实时预览</td><td>AI生成代码的同时，右侧实时渲染效果</td></tr>
+      <tr><td>一句话出效果</td><td>输入一句话 → 3秒后看到完整页面</td></tr>
+      <tr><td>分享方便</td><td>生成的项目自带URL，学生可以立刻访问</td></tr>
+    </table>
+    <div class="tip-box info">
+      <div class="tip-title">💡 bolt.new 特别适合课堂互动</div>
+      <p><b>bolt.new</b>（StackBlitz出品）是一个在线AI全栈开发平台，浏览器打开就能用。学生说一句话（比如"加一个深色模式切换按钮"），讲师输入，3秒后大屏上就能看到效果。<b>震撼力最强！</b>但需要注意：bolt.new有免费额度限制，且需要翻墙。</p>
+    </div>
+
+    <h4>方案三：ChatGPT Canvas</h4>
+    <table class="kb-table">
+      <tr><th>优势</th><th>说明</th></tr>
+      <tr><td>学生熟悉</td><td>很多学生已经用过ChatGPT</td></tr>
+      <tr><td>代码预览</td><td>Canvas模式可以实时编辑和预览代码</td></tr>
+      <tr><td>互动简单</td><td>像聊天一样说需求</td></tr>
+    </table>
+  </div>
+
+  <div class="section" id="s15-2">
+    <h3>15.2 互动流程设计</h3>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">1</span><span class="step-title">讲师开场（2分钟）</span></div>
+      <p>打开TRAE/bolt.new，投影到大屏。说明规则："今天我们一起做一个网页，每人提一个需求，说一句话就行！"</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">2</span><span class="step-title">起步Prompt（3分钟）</span></div>
+      <p>讲师先输入初始Prompt，比如："帮我创建一个班级主页，深色主题，包含班级名称和一个欢迎语。" AI生成基础版本。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">3</span><span class="step-title">轮流加需求（20-30分钟）</span></div>
+      <p>按座位顺序或举手，每个学生说一句需求：</p>
+      <pre class="code"><span class="comment">学生A：</span>"加一个同学名单区域"
+<span class="comment">学生B：</span>"给每个名字配一个随机颜色的头像"
+<span class="comment">学生C：</span>"加一个倒计时，显示离期末考试还有几天"
+<span class="comment">学生D：</span>"加一个夜间模式切换按钮"
+<span class="comment">学生E：</span>"加一个课程表"
+<span class="comment">学生F：</span>"加好看的动画效果"
+<span class="comment">学生G：</span>"加一个留言板功能"</pre>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><span class="step-num">4</span><span class="step-title">总结回顾（5分钟）</span></div>
+      <p>展示最终成品，回顾每个人的贡献。让学生感受到：<b>一句话就能改变一个产品</b>。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s15-3">
+    <h3>15.3 项目选择建议</h3>
+    <p>课堂互动项目应该选择<b>可视化效果明显</b>、<b>每次修改都能直观看到变化</b>的类型：</p>
+    <table class="kb-table">
+      <tr><th>推荐项目</th><th>为什么适合</th></tr>
+      <tr><td>班级主页</td><td>每个学生都有参与感，加名字、加功能</td></tr>
+      <tr><td>在线简历/Portfolio</td><td>每加一个区域都能直观看到</td></tr>
+      <tr><td>小游戏（贪吃蛇/2048）</td><td>趣味性强，每个功能都有即时反馈</td></tr>
+      <tr><td>仪表盘/看板</td><td>加图表、加数据、改颜色，效果炫酷</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ========== 第十六章 ========== -->
+<div class="chapter" id="ch16">
+  <h2><span class="ch-icon" style="background:rgba(236,72,153,0.15); color:var(--accent-pink);">💌</span> 第十六章：让AI给自己写一封信</h2>
+
+  <div class="section" id="s16-1">
+    <h3>16.1 可行性与玩法</h3>
+    <p>完全可行！让TRAE（或任何AI）在项目结束时写一封"给自己和项目的信"，是一个非常有趣的课堂收尾方式。AI会根据整个对话历史和项目内容，生成一封充满"感悟"的信。</p>
+    <div class="tip-box info">
+      <div class="tip-title">💡 为什么这个有意思</div>
+      <ul>
+        <li>AI会"回顾"整个项目的开发过程</li>
+        <li>会"感谢"和你的合作（虽然是模拟的，但很暖）</li>
+        <li>可以观察AI如何"理解"你的项目</li>
+        <li>是一个很好的课堂总结和反思工具</li>
+        <li>学生可以把这封信保存下来，作为项目纪念</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section" id="s16-2">
+    <h3>16.2 Prompt示例与效果</h3>
+    <h4>Prompt 1：让AI给项目写信</h4>
+    <pre class="code">我们的项目已经完成了！请你以AI助手的身份，给这个项目写一封信。
+回顾一下我们一起做了什么，你觉得这个项目怎么样，
+对未来这个项目的发展有什么建议。语气要真诚、温暖。</pre>
+
+    <h4>Prompt 2：让AI给自己写信</h4>
+    <pre class="code">作为一个AI编程助手，给你自己写一封信。
+聊聊你对"帮人类写代码"这件事的感受，
+你喜欢什么样的Prompt，讨厌什么样的指令，
+对使用你的同学有什么建议。</pre>
+
+    <h4>Prompt 3：让AI给学生写一封鼓励信</h4>
+    <pre class="code">作为AI编程助手，给刚刚完成第一个Vibe Coding项目的大学生写一封鼓励信。
+肯定他们的努力，分享你在这次合作中观察到的亮点，
+给出继续学习AI编程的建议。</pre>
+
+    <div class="tip-box success">
+      <div class="tip-title">✅ 课堂使用建议</div>
+      <p>在项目完成后的最后5分钟，让TRAE写这封信，投影给全班看。效果出奇地好——既能总结课程，又能让学生感受到AI的"温度"，是非常棒的课堂收尾！</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 第十七章 ========== -->
+<div class="chapter" id="ch17">
+  <h2><span class="ch-icon" style="background:rgba(139,92,246,0.15); color:var(--accent-purple);">🎒</span> 第十七章：无Git账号的教学方案</h2>
+
+  <div class="section" id="s17-1">
+    <h3>17.1 替代方案</h3>
+    <p>如果学生没有Git/GitHub账号，课堂上又不方便花时间注册，以下替代方案可以让Git部分的教学照常进行：</p>
+
+    <h4>方案A：只讲本地Git（推荐）</h4>
+    <table class="kb-table">
+      <tr><th>操作</th><th>是否需要GitHub账号</th><th>课堂可做</th></tr>
+      <tr><td><code>git init</code>（初始化仓库）</td><td>不需要</td><td>✅</td></tr>
+      <tr><td><code>git add .</code>（暂存）</td><td>不需要</td><td>✅</td></tr>
+      <tr><td><code>git commit</code>（提交）</td><td>不需要</td><td>✅</td></tr>
+      <tr><td><code>git log</code>（查看历史）</td><td>不需要</td><td>✅</td></tr>
+      <tr><td><code>git checkout</code>（回退）</td><td>不需要</td><td>✅</td></tr>
+      <tr><td><code>git push</code>（推送远程）</td><td><b>需要</b></td><td>❌ 课后再做</td></tr>
+    </table>
+    <div class="tip-box success">
+      <div class="tip-title">✅ 核心信息</div>
+      <p>Git的核心价值——<b>版本控制（快照 + 回退）</b>——完全不需要GitHub账号！本地就能体验全部核心功能。远程推送是锦上添花，课后注册账号再做。</p>
+    </div>
+
+    <h4>方案B：讲师演示远程操作</h4>
+    <p>讲师用自己的GitHub账号<b>演示</b>push/pull操作，学生观看理解概念即可。把"注册GitHub + 实际push"留作课后作业。</p>
+
+    <h4>方案C：用Gitee替代（国内）</h4>
+    <p>如果需要让学生现场体验远程仓库，<b>Gitee（码云）</b>是国内替代方案：不需要翻墙，支持手机号注册（比GitHub更快），功能与GitHub基本一致。</p>
+  </div>
+
+  <div class="section" id="s17-2">
+    <h3>17.2 概念讲解策略</h3>
+    <p>Git章节的核心不是教命令，而是让学生理解<b>为什么需要版本控制</b>。以下策略不依赖账号：</p>
+
+    <h4>策略1：用"撤销"类比</h4>
+    <pre class="code"><span class="comment">// 现场演示：</span>
+1. 在TRAE中用AI做一个小网页 → 效果很好 ✅
+2. 告诉AI："帮我把整个页面改成蓝色主题" → 改崩了 ❌
+3. 如果没用Git → 只能手动改回去（痛苦！）
+4. 如果用了Git → <span class="cmd">git checkout -- .</span> → 瞬间回到上一个好版本 ✅
+
+<span class="arg">一次演示胜过十页PPT！</span></pre>
+
+    <h4>策略2：用文件夹类比</h4>
+    <p>展示"没有Git"vs"有Git"的文件管理方式（见第四章4.1节的例子），让学生感受痛点。</p>
+
+    <h4>策略3：用TRAE的Git面板</h4>
+    <p>不需要敲命令！直接在TRAE的Git面板中点按钮操作：暂存（+）→ 提交（✓）→ 查看历史。图形化界面比命令行更直观。</p>
+  </div>
+
+  <div class="section" id="s17-3">
+    <h3>17.3 课后再注册</h3>
+    <p>在课程最后或课后通知中，引导学生自行注册：</p>
+    <pre class="code"><span class="comment">课后任务：</span>
+1. 注册GitHub账号：github.com（或 Gitee: gitee.com）
+2. 创建一个仓库，把你课上做的项目push上去
+3. 开启GitHub Pages，让你的项目有一个在线链接
+4. 把链接分享到班群！
+
+<span class="arg">这就是你的第一个"线上作品集"！</span></pre>
+  </div>
+</div>
+
+<!-- ========== 第十八章 ========== -->
+<div class="chapter" id="ch18">
+  <h2><span class="ch-icon" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan);">👥</span> 第十八章：团队Vibe Coding分工</h2>
+
+  <div class="section" id="s18-1">
+    <h3>18.1 角色分工模型</h3>
+    <p>在Vibe Coding时代，团队分工发生了变化。每个人都可以借助AI编程，但<b>角色定位</b>变得更加重要：</p>
+    <table class="kb-table">
+      <tr><th>角色</th><th>职责</th><th>AI怎么帮</th><th>人数建议</th></tr>
+      <tr><td><b>产品经理（PM）</b></td><td>定义需求、画原型、写用户故事</td><td>AI帮你把需求细化成Prompt、生成原型图</td><td>1人</td></tr>
+      <tr><td><b>前端开发</b></td><td>做用户界面、交互效果</td><td>用AI生成HTML/CSS/JS，迭代UI</td><td>1-2人</td></tr>
+      <tr><td><b>后端开发</b></td><td>写API、管数据库</td><td>用AI生成后端代码、设计数据库结构</td><td>1-2人</td></tr>
+      <tr><td><b>测试/QA</b></td><td>测试功能、找Bug、写反馈</td><td>用AI帮忙写测试用例、分析Bug原因</td><td>1人</td></tr>
+      <tr><td><b>项目经理</b></td><td>排期、协调、整合</td><td>用AI生成项目计划、总结会议纪要</td><td>1人（可兼任PM）</td></tr>
+    </table>
+
+    <div class="tip-box info">
+      <div class="tip-title">💡 Vibe Coding时代的关键变化</div>
+      <p>传统团队里，开发者的核心能力是"写代码"。Vibe Coding团队里，核心能力变成<b>"描述需求"和"审查结果"</b>。每个人都是AI的"导演"，但每个导演负责不同的"场景"。</p>
+    </div>
+  </div>
+
+  <div class="section" id="s18-2">
+    <h3>18.2 协作工作流</h3>
+    <pre class="code"><span class="comment">// 推荐的团队Vibe Coding工作流：</span>
+
+<span class="arg">第一阶段：需求定义（PM主导）</span>
+PM用AI生成需求文档和功能清单
+  → 团队讨论确认
+  → PM写好每个功能的Prompt模板
+
+<span class="arg">第二阶段：分工开发（各自进行）</span>
+前端开发用TRAE做页面和交互
+后端开发用TRAE做API和数据库
+  → 每个人在自己的Git分支上工作
+  → 每完成一个功能就commit
+
+<span class="arg">第三阶段：联调整合（全员参与）</span>
+前后端联调API
+测试人员开始测试，提交Bug
+  → 开发人员用AI修Bug
+
+<span class="arg">第四阶段：发布上线</span>
+合并所有分支到main
+部署到GitHub Pages / Vercel
+  → 全员review最终效果</pre>
+
+    <h4>Git分支策略</h4>
+    <pre class="code">main            <span class="comment">← 主分支，只放稳定版本</span>
+├── feature/login     <span class="comment">← 张三负责：登录功能</span>
+├── feature/dashboard <span class="comment">← 李四负责：仪表盘页面</span>
+├── feature/api       <span class="comment">← 王五负责：后端API</span>
+└── feature/ui        <span class="comment">← 赵六负责：UI美化</span>
+
+<span class="comment">每人在自己的分支开发，完成后merge到main</span></pre>
+
+    <h4>避免冲突的技巧</h4>
+    <ul>
+      <li><b>文件级别分工</b>：前端和后端改的是不同的文件，天然不冲突</li>
+      <li><b>频繁同步</b>：每天至少pull一次main分支的最新代码</li>
+      <li><b>约定接口</b>：前后端先约定好API格式（URL、参数、返回值），各自独立开发</li>
+      <li><b>让AI解决冲突</b>：合并时有冲突？直接让AI帮你解决</li>
+    </ul>
+  </div>
+
+  <div class="section" id="s18-3">
+    <h3>18.3 实战案例：4人团队做一个校园活动平台</h3>
+    <table class="kb-table">
+      <tr><th>成员</th><th>角色</th><th>负责内容</th><th>Prompt示例</th></tr>
+      <tr><td>小明</td><td>PM + 前端</td><td>需求定义 + 首页UI</td><td>"帮我做一个活动列表页面，卡片式布局，每个卡片显示活动名称、时间、地点"</td></tr>
+      <tr><td>小红</td><td>前端</td><td>活动详情页 + 报名表单</td><td>"做一个活动详情页面，有报名按钮，点击弹出报名表单"</td></tr>
+      <tr><td>小刚</td><td>后端</td><td>API + 数据存储</td><td>"用Node.js写一个活动管理的API：获取列表、创建活动、报名、取消报名"</td></tr>
+      <tr><td>小美</td><td>测试</td><td>测试 + UI优化</td><td>"我测试发现报名后没有提示成功，帮我加一个成功提示弹窗"</td></tr>
+    </table>
+
+    <div class="tip-box success">
+      <div class="tip-title">✅ 团队Vibe Coding的核心原则</div>
+      <ol>
+        <li><b>先约定再动手</b>：统一技术栈、接口格式、代码风格</li>
+        <li><b>各自负责，定期同步</b>：每人维护自己的模块，每天碰一次进度</li>
+        <li><b>让AI做重复劳动</b>：写代码、写文档、写测试用例都可以交给AI</li>
+        <li><b>人负责决策</b>：选哪个方案、用什么技术、怎么分优先级——这些人来定</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 附录A ========== -->
+<div class="chapter" id="appendix-a">
+  <h2><span class="ch-icon" style="background:rgba(245,158,11,0.15); color:var(--accent-orange);">📋</span> 附录A：Prompt速查手册</h2>
+
+  <div class="section">
+    <h3>创建项目类</h3>
+    <pre class="code"><span class="comment">// 创建新项目</span>
+帮我创建一个[项目类型]，要求：单个HTML文件，[功能列表]，[设计风格]
+
+<span class="comment">// 让AI规划项目</span>
+我想做一个[项目描述]，帮我列出功能清单和开发步骤
+
+<span class="comment">// 参考设计</span>
+帮我做一个类似[参考产品]的[功能]，风格参考[设计参考]</pre>
+
+    <h3>修改功能类</h3>
+    <pre class="code"><span class="comment">// 添加功能</span>
+在现有基础上，添加[具体功能描述]
+
+<span class="comment">// 修改外观</span>
+把[具体元素]改成[新的样式]，整体保持[风格]
+
+<span class="comment">// 修复问题</span>
+[描述看到的现象]，期望的行为是[描述期望]，帮我修复</pre>
+
+    <h3>Debug类</h3>
+    <pre class="code"><span class="comment">// 报错修复</span>
+运行后报错：[粘贴完整错误信息]，帮我修复
+
+<span class="comment">// 代码解释</span>
+解释一下这段代码的第[X]行到第[Y]行是做什么的
+
+<span class="comment">// 重新实现</span>
+这个功能太复杂了，用更简单的方式重新实现</pre>
+
+    <h3>Git操作类</h3>
+    <pre class="code"><span class="comment">// 提交代码</span>
+帮我把当前代码提交到Git，备注写"[提交说明]"
+
+<span class="comment">// 推送到远程</span>
+帮我把代码推送到GitHub
+
+<span class="comment">// 回滚</span>
+帮我撤销上一次的修改，回到之前能用的版本</pre>
+  </div>
+</div>
+
+<!-- ========== 附录B ========== -->
+<div class="chapter" id="appendix-b">
+  <h2><span class="ch-icon" style="background:rgba(139,92,246,0.15); color:var(--accent-purple);">⌨️</span> 附录B：Git命令速查表</h2>
+
+  <div class="section">
+    <h3>基础操作</h3>
+    <pre class="code"><span class="cmd">git init</span>                    <span class="comment"># 初始化仓库</span>
+<span class="cmd">git add</span> .                    <span class="comment"># 暂存所有文件</span>
+<span class="cmd">git add</span> <span class="arg">文件名</span>               <span class="comment"># 暂存指定文件</span>
+<span class="cmd">git commit</span> -m <span class="str">"说明"</span>        <span class="comment"># 提交</span>
+<span class="cmd">git status</span>                   <span class="comment"># 查看状态</span>
+<span class="cmd">git log</span> --oneline            <span class="comment"># 查看历史</span></pre>
+
+    <h3>远程操作</h3>
+    <pre class="code"><span class="cmd">git remote add</span> origin <span class="arg">URL</span>   <span class="comment"># 关联远程仓库</span>
+<span class="cmd">git push</span> origin main         <span class="comment"># 推送到远程</span>
+<span class="cmd">git pull</span> origin main         <span class="comment"># 拉取远程最新</span>
+<span class="cmd">git clone</span> <span class="arg">URL</span>               <span class="comment"># 克隆远程仓库</span></pre>
+
+    <h3>撤销与回退</h3>
+    <pre class="code"><span class="cmd">git checkout</span> -- .            <span class="comment"># 撤销未暂存的修改</span>
+<span class="cmd">git reset</span> HEAD <span class="arg">文件名</span>        <span class="comment"># 取消暂存</span>
+<span class="cmd">git reset</span> --hard HEAD~1      <span class="comment"># 回退到上一次提交</span>
+<span class="cmd">git reset</span> --hard <span class="arg">commit-id</span>  <span class="comment"># 回退到指定提交</span></pre>
+
+    <h3>分支操作</h3>
+    <pre class="code"><span class="cmd">git branch</span>                   <span class="comment"># 查看分支</span>
+<span class="cmd">git checkout</span> -b <span class="arg">分支名</span>       <span class="comment"># 创建并切换到新分支</span>
+<span class="cmd">git checkout</span> <span class="arg">分支名</span>          <span class="comment"># 切换分支</span>
+<span class="cmd">git merge</span> <span class="arg">分支名</span>             <span class="comment"># 合并分支</span></pre>
+
+    <h3>配置</h3>
+    <pre class="code"><span class="cmd">git config</span> --global user.name <span class="str">"你的名字"</span>
+<span class="cmd">git config</span> --global user.email <span class="str">"你的邮箱"</span></pre>
+  </div>
+</div>
+
+<!-- ========== 附录C ========== -->
+<div class="chapter" id="appendix-c">
+  <h2><span class="ch-icon" style="background:rgba(236,72,153,0.15); color:var(--accent-pink);">❓</span> 附录C：常见问题FAQ</h2>
+
+  <div class="section">
+    <h4>Q：AI生成的代码跑不了怎么办？</h4>
+    <p>A：按F12打开浏览器开发者工具，查看Console中的报错信息，把错误信息复制给AI，让它修复。</p>
+
+    <h4>Q：AI写的代码和我想的不一样？</h4>
+    <p>A：更具体地描述你的需求。用"我想要XXX"而不是"帮我做一个网站"。可以参考3.3节的万能模板。</p>
+
+    <h4>Q：TRAE安装后打不开？</h4>
+    <p>A：确认系统满足要求（Windows 10+/macOS 10.15+）。尝试右键以管理员身份运行。如果仍然不行，卸载后重新下载安装。</p>
+
+    <h4>Q：Git push被拒绝了？</h4>
+    <p>A：常见原因是远程有你本地没有的提交。先执行 <code>git pull --rebase origin main</code>，然后再push。</p>
+
+    <h4>Q：LocalStorage数据丢了？</h4>
+    <p>A：LocalStorage与浏览器和域名绑定。用不同浏览器或清除浏览数据会丢失。生产环境应该用数据库。</p>
+
+    <h4>Q：AI可以帮我做后端吗？</h4>
+    <p>A：可以！但需要安装Node.js或Python运行环境。本课程专注前端，后端可以课后自学。</p>
+
+    <h4>Q：做完项目怎么让别人访问？</h4>
+    <p>A：参考第七章的部署教程，用GitHub Pages或Vercel免费部署。</p>
+
+    <h4>Q：我完全没有编程基础，能跟上吗？</h4>
+    <p>A：Vibe Coding的核心就是用自然语言编程。你不需要会写代码，只需要会描述需求。跟着课程步骤来就行！</p>
+  </div>
+</div>
+
+</main>
+
+<a href="#" class="back-to-top" id="backToTop">↑</a>
+
+<script>
+  // 回到顶部按钮
+  const backToTop = document.getElementById('backToTop');
+  const mainContent = document.querySelector('.main-content');
+  window.addEventListener('scroll', () => {
+    backToTop.classList.toggle('visible', window.scrollY > 400);
+  });
+
+  // 侧边栏高亮
+  const sections = document.querySelectorAll('[id]');
+  const navLinks = document.querySelectorAll('.sidebar a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+
+  // 移动端：点击链接后关闭侧边栏
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

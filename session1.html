@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第一节：AI编程——一场正在发生的革命</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Fira+Code:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-card: #1a2332;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-green: #10b981;
+    --accent-orange: #f59e0b;
+    --accent-pink: #ec4899;
+    --accent-red: #ef4444;
+    --gradient-main: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    --gradient-warm: linear-gradient(135deg, #f59e0b, #ec4899);
+    --gradient-cool: linear-gradient(135deg, #10b981, #3b82f6);
+  }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .slide {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    padding: 60px 80px;
+    position: relative;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .slide.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-number {
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-family: 'Fira Code', monospace;
+    z-index: 100;
+  }
+
+  .progress-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--gradient-main);
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  .nav-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 30px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    z-index: 100;
+  }
+
+  .section-tag {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+
+  .tag-lecture { background: rgba(59,130,246,0.15); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.3); }
+  .tag-demo { background: rgba(139,92,246,0.15); color: var(--accent-purple); border: 1px solid rgba(139,92,246,0.3); }
+  .tag-practice { background: rgba(16,185,129,0.15); color: var(--accent-green); border: 1px solid rgba(16,185,129,0.3); }
+  .tag-summary { background: rgba(245,158,11,0.15); color: var(--accent-orange); border: 1px solid rgba(245,158,11,0.3); }
+
+  h1 {
+    font-size: 3.2em;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    background: var(--gradient-main);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  h1.warm-gradient {
+    background: var(--gradient-warm);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  h1.cool-gradient {
+    background: var(--gradient-cool);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  h2 {
+    font-size: 2.2em;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+  }
+
+  h3 {
+    font-size: 1.5em;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+  }
+
+  .subtitle {
+    font-size: 1.4em;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .big-emoji {
+    font-size: 4em;
+    margin-bottom: 20px;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    width: 100%;
+    max-width: 1100px;
+    margin-top: 10px;
+  }
+
+  .content-grid.three-col {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 30px;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .card .card-icon {
+    font-size: 2em;
+    margin-bottom: 12px;
+  }
+
+  .card h4 {
+    font-size: 1.2em;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+  }
+
+  .card p, .card li {
+    font-size: 1em;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .timeline {
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+    padding-left: 40px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent-blue), var(--accent-purple), var(--accent-pink));
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 22px;
+    padding-left: 30px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -32px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    border: 2px solid var(--bg-primary);
+    box-shadow: 0 0 10px rgba(59,130,246,0.5);
+  }
+
+  .timeline-item .year {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+    color: var(--accent-blue);
+    font-weight: 500;
+  }
+
+  .timeline-item .event {
+    font-size: 1.05em;
+    color: var(--text-primary);
+    margin-top: 2px;
+  }
+
+  .timeline-item .detail {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .quote-box {
+    background: var(--bg-card);
+    border-left: 4px solid var(--accent-purple);
+    border-radius: 0 12px 12px 0;
+    padding: 30px 40px;
+    max-width: 800px;
+    margin: 20px 0;
+  }
+
+  .quote-box .quote-text {
+    font-size: 1.3em;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
+
+  .quote-box .quote-author {
+    margin-top: 15px;
+    font-size: 1em;
+    color: var(--accent-purple);
+    font-weight: 500;
+  }
+
+  .code-block {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 24px 28px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95em;
+    line-height: 1.8;
+    border: 1px solid rgba(255,255,255,0.06);
+    max-width: 800px;
+    width: 100%;
+    margin: 15px 0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .code-block .comment { color: #6b7280; }
+  .code-block .keyword { color: #c084fc; }
+  .code-block .string { color: #34d399; }
+  .code-block .function { color: #60a5fa; }
+
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 16px;
+    padding: 30px 40px;
+    max-width: 800px;
+    margin: 15px 0;
+  }
+
+  .step-list {
+    list-style: none;
+    max-width: 800px;
+    width: 100%;
+  }
+
+  .step-list li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    font-size: 1.15em;
+    line-height: 1.5;
+  }
+
+  .step-list .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gradient-main);
+    color: white;
+    font-weight: 700;
+    font-size: 0.85em;
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+
+  .vs-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 20px;
+    align-items: center;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .vs-divider {
+    font-size: 2em;
+    font-weight: 900;
+    background: var(--gradient-warm);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .practice-box {
+    background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.08));
+    border: 2px solid rgba(16,185,129,0.3);
+    border-radius: 16px;
+    padding: 35px 45px;
+    max-width: 850px;
+    width: 100%;
+  }
+
+  .practice-box h4 {
+    color: var(--accent-green);
+    font-size: 1.3em;
+    margin-bottom: 15px;
+  }
+
+  .practice-box p, .practice-box li {
+    font-size: 1.1em;
+    line-height: 1.7;
+    color: var(--text-primary);
+  }
+
+  .practice-box ul {
+    padding-left: 20px;
+    margin-top: 10px;
+  }
+
+  .practice-box li {
+    margin-bottom: 8px;
+  }
+
+  .full-center {
+    text-align: center;
+  }
+
+  .tag-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .mini-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.85em;
+    background: rgba(59,130,246,0.1);
+    color: var(--accent-blue);
+    border: 1px solid rgba(59,130,246,0.2);
+  }
+
+  .img-placeholder {
+    width: 100%;
+    max-width: 600px;
+    height: 300px;
+    background: var(--bg-card);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 1.1em;
+    border: 1px dashed rgba(255,255,255,0.1);
+    margin: 15px 0;
+  }
+
+  .two-col-text {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 1000px;
+    width: 100%;
+  }
+
+  .two-col-text .col h4 {
+    font-size: 1.2em;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+  }
+
+  .two-col-text .col p {
+    font-size: 1.05em;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  .emoji-list {
+    list-style: none;
+    max-width: 800px;
+  }
+
+  .emoji-list li {
+    font-size: 1.2em;
+    margin-bottom: 14px;
+    line-height: 1.5;
+    padding-left: 5px;
+  }
+
+  .table-simple {
+    border-collapse: collapse;
+    max-width: 800px;
+    width: 100%;
+    margin: 15px 0;
+  }
+
+  .table-simple th, .table-simple td {
+    padding: 14px 20px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 1.05em;
+  }
+
+  .table-simple th {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  .table-simple td {
+    color: var(--text-secondary);
+  }
+
+  .slide-bg-glow {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.07;
+    pointer-events: none;
+  }
+
+  .glow-blue { background: var(--accent-blue); top: -100px; right: -100px; }
+  .glow-purple { background: var(--accent-purple); bottom: -100px; left: -100px; }
+  .glow-green { background: var(--accent-green); top: 50%; right: -100px; }
+
+  @media (max-width: 768px) {
+    .slide { padding: 30px 25px; }
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.5em; }
+    .subtitle { font-size: 1.1em; }
+    .content-grid { grid-template-columns: 1fr; }
+    .content-grid.three-col { grid-template-columns: 1fr; }
+    .vs-container { grid-template-columns: 1fr; }
+    .two-col-text { grid-template-columns: 1fr; }
+    .card { padding: 20px; }
+  }
+
+  @media print {
+    .slide { display: flex !important; page-break-after: always; height: auto; min-height: 100vh; }
+    .nav-hint, .slide-number, .progress-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== SLIDE 1: 封面 ==================== -->
+<div class="slide active full-center" id="slide-1">
+  <div class="slide-bg-glow glow-blue"></div>
+  <div class="slide-bg-glow glow-purple"></div>
+  <p style="font-size:1.1em; color:var(--accent-blue); letter-spacing:3px; margin-bottom:30px;">VIBE CODING 微课堂 · 第一节</p>
+  <h1 style="font-size:3.5em;">AI编程<br>一场正在发生的革命</h1>
+  <h3 style="color:var(--text-secondary); margin-top:10px;">从"学编程"到"学说话"的时代</h3>
+  <div style="margin-top:50px; color:var(--text-secondary); font-size:0.95em;">
+    <p>按 <kbd style="background:var(--bg-card);padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);">→</kbd> 开始 · 按 <kbd style="background:var(--bg-card);padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);">←</kbd> 后退</p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 2: 破冰 ==================== -->
+<div class="slide full-center" id="slide-2">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <div class="big-emoji">🤔</div>
+  <h1>先问大家几个问题</h1>
+  <ul class="emoji-list" style="text-align:left; margin-top:20px;">
+    <li>1️⃣ 你们平时写代码，最头疼的是什么？</li>
+    <li>2️⃣ 有多少人用过 ChatGPT / 豆包 / 通义千问？</li>
+    <li>3️⃣ 有人用AI帮自己写过代码吗？</li>
+    <li>4️⃣ 听说过"Vibe Coding"吗？</li>
+  </ul>
+</div>
+
+<!-- ==================== SLIDE 3: 一个故事 ==================== -->
+<div class="slide" id="slide-3">
+  <div class="slide-bg-glow glow-purple"></div>
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h1 class="warm-gradient">一个真实的故事</h1>
+  <div class="quote-box" style="margin-top:10px;">
+    <p class="quote-text">
+      "我是一个设计师，完全不会写代码。<br>
+      但我用AI编程工具，<b>一个人在3天内做出了一个完整的SaaS产品</b>，<br>
+      还上线了，有了付费用户。"
+    </p>
+    <p class="quote-author">—— 某独立开发者，2025年</p>
+  </div>
+  <p style="margin-top:30px; font-size:1.2em; color:var(--text-secondary);">
+    这不是段子，这是2025年正在发生的事情。<br>
+    <span style="color:var(--accent-orange);">而这一切的起点，要从4年前说起……</span>
+  </p>
+</div>
+
+<!-- ==================== SLIDE 4: 时间线 ==================== -->
+<div class="slide" id="slide-4">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2 style="margin-bottom:25px;">⏳ AI编程大事记</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <span class="year">2021年6月</span>
+      <div class="event"><b>GitHub Copilot</b> 预览版发布</div>
+      <div class="detail">第一个AI代码补全工具，程序员第一次感到"不安"</div>
+    </div>
+    <div class="timeline-item">
+      <span class="year">2022年11月</span>
+      <div class="event"><b>ChatGPT</b> 横空出世</div>
+      <div class="detail">AI从实验室走向大众，人人都能和AI对话写代码</div>
+    </div>
+    <div class="timeline-item">
+      <span class="year">2023年3月</span>
+      <div class="event"><b>GPT-4</b> 发布，代码能力质的飞跃</div>
+      <div class="detail">能理解复杂需求，生成可运行的完整程序</div>
+    </div>
+    <div class="timeline-item">
+      <span class="year">2024年</span>
+      <div class="event"><b>Cursor</b> 爆火，AI IDE革命开始</div>
+      <div class="detail">把AI直接融入编辑器，编程方式开始巨变</div>
+    </div>
+    <div class="timeline-item" style="margin-bottom:0;">
+      <span class="year" style="color:var(--accent-pink);">2025年2月</span>
+      <div class="event" style="color:var(--accent-pink);"><b>Andrej Karpathy</b> 提出 "Vibe Coding"</div>
+      <div class="detail">前OpenAI联合创始人的一条推文，定义了一个新时代</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 5: Karpathy的推文 ==================== -->
+<div class="slide full-center" id="slide-5">
+  <div class="slide-bg-glow glow-blue"></div>
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>那条改变编程定义的推文</h2>
+  <div class="quote-box" style="border-left-color: var(--accent-pink); margin-top:20px;">
+    <p class="quote-text">
+      "There's a new kind of coding I call <b>'vibe coding'</b>, where you fully give in to the vibes, embrace exponentials, and <b>forget that the code even exists</b>."
+    </p>
+    <p class="quote-text" style="margin-top:15px; font-size:1.1em; color: var(--text-secondary);">
+      "有一种新的编程方式，我称之为<b>「氛围编程」</b>——你完全沉浸在感觉中，拥抱指数级增长，<b>忘掉代码本身的存在</b>。"
+    </p>
+    <p class="quote-author">—— Andrej Karpathy，2025年2月</p>
+  </div>
+  <p style="margin-top:25px; font-size:1.15em; color:var(--text-secondary);">
+    他是谁？前OpenAI联合创始人，前特斯拉AI总监，<br>
+    Stanford CS博士——AI界的"顶流"之一。
+  </p>
+</div>
+
+<!-- ==================== SLIDE 6: 什么是Vibe Coding ==================== -->
+<div class="slide" id="slide-6">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h1>所以，Vibe Coding到底是什么？</h1>
+  <div class="content-grid" style="margin-top:20px;">
+    <div class="card">
+      <div class="card-icon">🧓</div>
+      <h4>传统编程</h4>
+      <p>你需要：</p>
+      <ul style="padding-left:18px; margin-top:8px;">
+        <li>学语法（Python/Java/C++...）</li>
+        <li>记API和框架</li>
+        <li>自己一行行写代码</li>
+        <li>自己Debug到崩溃</li>
+        <li>学习周期：<b>几个月到几年</b></li>
+      </ul>
+    </div>
+    <div class="card" style="border-color: rgba(139,92,246,0.3);">
+      <div class="card-icon">🚀</div>
+      <h4 style="color:var(--accent-purple);">Vibe Coding</h4>
+      <p>你需要：</p>
+      <ul style="padding-left:18px; margin-top:8px;">
+        <li><b>用自然语言描述你想要什么</b></li>
+        <li>AI帮你写代码</li>
+        <li>你看效果，告诉AI哪里不对</li>
+        <li>AI帮你修，你继续"指挥"</li>
+        <li>学习周期：<b>几分钟入门</b></li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:25px; font-size:1.1em; color:var(--accent-orange);">
+    简单说：<b>你是导演，AI是编剧+程序员。你说戏，AI干活。</b>
+  </p>
+</div>
+
+<!-- ==================== SLIDE 7: Copilot vs Agent ==================== -->
+<div class="slide" id="slide-7">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>两种AI编程模式</h2>
+  <div class="vs-container" style="margin-top:25px;">
+    <div class="card">
+      <div class="card-icon">🤖</div>
+      <h4>AI Copilot（副驾驶）</h4>
+      <p style="margin-top:10px;">你在写代码，AI在旁边帮你补全。</p>
+      <ul style="padding-left:18px; margin-top:12px; color:var(--text-secondary);">
+        <li>你打几个字，AI猜你要写什么</li>
+        <li>像一个超级智能的自动补全</li>
+        <li>你仍然在"开车"</li>
+      </ul>
+      <p style="margin-top:12px; font-size:0.9em;">代表：GitHub Copilot</p>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div class="card" style="border-color: rgba(139,92,246,0.3);">
+      <div class="card-icon">🧠</div>
+      <h4 style="color:var(--accent-purple);">AI Agent（智能体）</h4>
+      <p style="margin-top:10px;">你说需求，AI自己写完整个项目。</p>
+      <ul style="padding-left:18px; margin-top:12px; color:var(--text-secondary);">
+        <li>你描述需求，AI自己规划和执行</li>
+        <li>能创建文件、写代码、运行、修Bug</li>
+        <li><b>AI在"开车"，你在"导航"</b></li>
+      </ul>
+      <p style="margin-top:12px; font-size:0.9em;">代表：<b>TRAE</b>, Cursor, Windsurf</p>
+    </div>
+  </div>
+  <p style="margin-top:25px; font-size:1.1em; color:var(--accent-green);">
+    今天我们要学的，就是 <b>Agent模式</b>——真正的Vibe Coding！
+  </p>
+</div>
+
+<!-- ==================== SLIDE 8: 有趣的案例 ==================== -->
+<div class="slide" id="slide-8">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h1 class="warm-gradient">那些用AI编程的"离谱"故事</h1>
+  <div class="content-grid three-col" style="margin-top:15px;">
+    <div class="card">
+      <div class="card-icon">👦</div>
+      <h4>8岁小朋友</h4>
+      <p>用ChatGPT做了一个聊天机器人网站，还给它设计了一个可爱的UI。</p>
+      <p style="margin-top:10px; color:var(--accent-blue); font-size:0.9em;">零基础 → 有作品</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎨</div>
+      <h4>UI设计师</h4>
+      <p>从没写过一行代码，用Cursor做了一个Chrome插件，上架了Chrome商店。</p>
+      <p style="margin-top:10px; color:var(--accent-purple); font-size:0.9em;">非程序员 → 独立开发者</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <h4>产品经理</h4>
+      <p>周末用AI写了一个小工具，解决了自己团队的痛点，还做成了付费产品。</p>
+      <p style="margin-top:10px; color:var(--accent-green); font-size:0.9em;">想法 → 产品 → 收入</p>
+    </div>
+  </div>
+  <p style="margin-top:30px; font-size:1.2em; text-align:center;">
+    他们的共同点？<span style="color:var(--accent-orange);"><b>都不是专业程序员</b></span>。<br>
+    无论你的背景是什么——<b>想想你能做什么？</b>
+  </p>
+</div>
+
+<!-- ==================== SLIDE 9: 一个段子 ==================== -->
+<div class="slide full-center" id="slide-9">
+  <div class="big-emoji">😂</div>
+  <h2>程序员的进化史</h2>
+  <div style="max-width:700px; margin-top:30px; text-align:left;">
+    <div style="margin-bottom:20px;">
+      <p style="color:var(--text-secondary);">📅 <b>2015年</b>：花3个月学Python，写了一个计算器</p>
+    </div>
+    <div style="margin-bottom:20px;">
+      <p style="color:var(--text-secondary);">📅 <b>2020年</b>：花1个月跟教程，做了一个网站</p>
+    </div>
+    <div style="margin-bottom:20px;">
+      <p style="color:var(--text-secondary);">📅 <b>2023年</b>：花1天问ChatGPT，做了一个APP</p>
+    </div>
+    <div style="margin-bottom:20px;">
+      <p style="color:var(--accent-purple);">📅 <b>2025年</b>：花10分钟和AI聊天，做了一个SaaS产品</p>
+    </div>
+    <div>
+      <p style="color:var(--accent-pink); font-size:1.2em;">📅 <b>2026年</b>：告诉AI"给我搞个创业项目"，然后去泡了杯咖啡……</p>
+    </div>
+  </div>
+  <p style="margin-top:35px; font-size:1.1em; color:var(--text-secondary);">（虽然是段子，但趋势是真的 😄）</p>
+</div>
+
+<!-- ==================== SLIDE 10: 为什么你应该学这个 ==================== -->
+<div class="slide" id="slide-10">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h1 class="cool-gradient">为什么你应该现在学Vibe Coding？</h1>
+  <div class="content-grid" style="margin-top:15px;">
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h4>10倍效率提升</h4>
+      <p>以前需要一周的项目，现在可能一天就能搞定。在校期间做课设、做毕设，效率翻倍。</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎯</div>
+      <h4>就业竞争力</h4>
+      <p>企业已经在招"会用AI编程的人"。这不是加分项，正在变成<b>必备技能</b>。</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💡</div>
+      <h4>实现你的想法</h4>
+      <p>有一个APP的想法？一个小工具？一个游戏？现在你可以自己做出来！</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🆓</div>
+      <h4>门槛极低</h4>
+      <p>不需要精通任何编程语言。会说话、会描述需求，就能开始Vibe Coding。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 11: 进入实操 ==================== -->
+<div class="slide full-center" id="slide-11">
+  <div class="slide-bg-glow glow-green"></div>
+  <span class="section-tag tag-demo">🖥️ 演示</span>
+  <div class="big-emoji">🛠️</div>
+  <h1>好了，说够了<br>Let's Do It!</h1>
+  <h3 style="margin-top:10px;">接下来，我带大家装工具，写代码</h3>
+</div>
+
+<!-- ==================== SLIDE 12: TRAE介绍 ==================== -->
+<div class="slide" id="slide-12">
+  <span class="section-tag tag-demo">🖥️ 演示</span>
+  <h2>我们的武器：TRAE</h2>
+  <div class="content-grid" style="margin-top:15px;">
+    <div>
+      <table class="table-simple">
+        <tr><th>特性</th><th>说明</th></tr>
+        <tr><td>💰 价格</td><td><b>完全免费</b></td></tr>
+        <tr><td>🏠 出品</td><td>字节跳动（国内直连）</td></tr>
+        <tr><td>🌐 语言</td><td>中文界面，中文对话</td></tr>
+        <tr><td>🤖 AI模型</td><td>内置，无需配API</td></tr>
+        <tr><td>🔧 基础</td><td>基于VS Code</td></tr>
+        <tr><td>🧠 模式</td><td>支持Agent + Chat</td></tr>
+      </table>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;">
+      <p style="font-size:1.1em;color:var(--text-secondary);text-align:center;margin-bottom:20px;">下载地址</p>
+      <p style="font-size:1.8em;font-weight:700;text-align:center;">
+        <a href="https://trae.ai" style="color:var(--accent-blue);text-decoration:none;">trae.ai</a>
+      </p>
+      <p style="margin-top:20px;font-size:0.95em;color:var(--text-secondary);text-align:center;">
+        支持 Windows / macOS
+      </p>
+    </div>
+  </div>
+  <p style="margin-top:25px; font-size:1em; color:var(--text-secondary);">
+    💡 为什么不用Cursor？Cursor很好但部分功能要付费。TRAE完全免费，而且国内无障碍使用。
+  </p>
+</div>
+
+<!-- ==================== SLIDE 12B: AI 编程工具对比 ==================== -->
+<div class="slide" id="slide-12b">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>AI 编程工具对比</h2>
+  <div class="content-grid" style="margin-top:15px;">
+    <div class="card">
+      <h4>常见工具</h4>
+      <ul style="padding-left:18px; margin-top:8px;">
+        <li>TRAE：本地中文 IDE，Agent 能力内置，<b>免费</b>、国内直连</li>
+        <li>Cursor：IDE 形态强，协作体验好，部分功能需付费</li>
+        <li>Claude Code：终端型 Agent，上下文超大，学习门槛略高</li>
+        <li>OpenAI（GPT-4o/mini 等）：网页/CLI 多形态，API 计费</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>对比要点</h4>
+      <table class="table-simple" style="margin-top:8px;">
+        <tr><th>维度</th><th>TRAE</th><th>Cursor/Claude/GPT</th></tr>
+        <tr><td>费用</td><td>免费</td><td>部分收费/按量计费</td></tr>
+        <tr><td>可用性</td><td>国内直连</td><td>多需翻墙/绑卡</td></tr>
+        <tr><td>形态</td><td>IDE + Agent</td><td>IDE/终端/网页多形态</td></tr>
+        <tr><td>上手</td><td>低门槛，适合教学</td><td>中-高</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:15px; max-width:900px;">
+    <p style="font-size:1.05em;">
+      📌 结论：本课程以 <b>TRAE</b> 为主，其他工具做思路参考。工具不是目的，<b>掌握Vibe Coding方法</b>才是关键。
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 13: 安装步骤 ==================== -->
+<div class="slide" id="slide-13">
+  <span class="section-tag tag-demo">🖥️ 演示</span>
+  <h2>安装TRAE（跟着我来）</h2>
+  <ul class="step-list" style="margin-top:20px;">
+    <li>
+      <span class="step-num">1</span>
+      <div>
+        <b>打开浏览器</b>，访问 <span style="color:var(--accent-blue);">trae.ai</span><br>
+        <span style="color:var(--text-secondary);font-size:0.9em;">（如果之前通知里已经下好了，直接跳到第3步）</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">2</span>
+      <div>
+        <b>点击下载</b>，选择你的操作系统（Windows / macOS）<br>
+        <span style="color:var(--text-secondary);font-size:0.9em;">下载文件大约 200-300 MB</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">3</span>
+      <div>
+        <b>安装</b>，一路默认就行（Windows用户注意勾选"添加到PATH"）
+      </div>
+    </li>
+    <li>
+      <span class="step-num">4</span>
+      <div>
+        <b>打开TRAE</b>，用手机号/字节账号 <b>注册登录</b>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">5</span>
+      <div>
+        <b>选择AI模型</b>：建议选默认推荐的模型<br>
+        <span style="color:var(--text-secondary);font-size:0.9em;">免费模型完全够用，不用担心费用</span>
+      </div>
+    </li>
+  </ul>
+  <p style="margin-top:20px; color:var(--accent-orange);">
+    ⚠️ 遇到问题？举手！我来帮你。
+  </p>
+</div>
+
+<!-- ==================== SLIDE 14: TRAE界面介绍 ==================== -->
+<div class="slide" id="slide-14">
+  <span class="section-tag tag-demo">🖥️ 演示</span>
+  <h2>TRAE界面速览</h2>
+  <div class="content-grid" style="margin-top:15px;">
+    <div class="card">
+      <h4>📁 左侧：文件管理器</h4>
+      <p>你的项目文件都在这里，可以新建文件夹、文件，拖拽管理。</p>
+    </div>
+    <div class="card">
+      <h4>📝 中间：代码编辑区</h4>
+      <p>写代码的主战场。AI生成的代码也会显示在这里。</p>
+    </div>
+    <div class="card">
+      <h4>💬 右侧：AI对话面板</h4>
+      <p>和AI聊天的地方。可以切换 Chat 模式和 <b>Agent 模式</b>。</p>
+    </div>
+    <div class="card">
+      <h4>⬇️ 底部：终端</h4>
+      <p>运行命令的地方。AI Agent也会在这里执行命令。</p>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:20px; text-align:center;">
+    <p style="font-size:1.15em;">
+      🔑 <b>核心记忆</b>：切换到 <span style="color:var(--accent-purple);font-weight:700;">Agent模式</span>！<br>
+      这才是Vibe Coding的精髓——让AI不只是聊天，而是直接帮你干活。
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 14B: TRAE版本说明 ==================== -->
+<div class="slide" id="slide-14b">
+  <span class="section-tag tag-demo">🖥️ 演示</span>
+  <h2>TRAE版本说明</h2>
+  <div class="content-grid" style="margin-top:15px;">
+    <div class="card" style="grid-column: 1 / -1;">
+      <h4>版本对比（以官方发布为准）</h4>
+      <table class="table-simple" style="margin-top:8px;">
+        <tr><th>版本</th><th>定位</th><th>典型场景</th></tr>
+        <tr>
+          <td>TRAE IDE（基础版）</td>
+          <td>传统 IDE 基础版（个人免费），包含 <b>Chat 模式</b>、<b>Builder 模式</b>、<b>Builder vs MCP 模式</b></td>
+          <td>学习入门、日常编码、轻量项目与原型</td>
+        </tr>
+        <tr>
+          <td>TreeWork（原 TreeSolo）</td>
+          <td>全自动的独立"工作"版本（已由 TreeSolo 升级更名为 TreeWork），<b>内置专用智能体</b></td>
+          <td>新项目从零到可运行工程；存量项目迭代、重构与修复</td>
+        </tr>
+      </table>
+      <div style="margin-top:10px;">
+        <h4 style="margin-bottom:6px;">TreeWork 内置专用智能体</h4>
+        <ul class="emoji-list" style="margin-top:0;">
+          <li><b>SoloBuilder</b>：从零搭建新项目，覆盖全站原型/页面开发，快速交付<b>可运行的完整工程</b></li>
+          <li><b>SoloCoder</b>：面向<b>存量项目</b>，迭代与重构、批量修改文件、修复复杂 Bug</li>
+        </ul>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.95em; margin-top:6px;">提示：命名与能力以 TRAE 官方发布为准；如有更新，请以官网为准。</p>
+    </div>
+  </div>
+</div></div>
+
+<!-- ==================== SLIDE 15: 第一次AI编程演示 ==================== -->
+<div class="slide" id="slide-15">
+  <span class="section-tag tag-demo">🖥️ 演示</span>
+  <h2>🎬 第一次Vibe Coding演示</h2>
+  <p class="subtitle" style="margin-bottom:20px;">看我怎么用一句话让AI写出一个网页</p>
+  <div class="code-block" style="font-size:1.05em;">
+<span class="comment">// 我在TRAE的Agent对话框里输入：</span>
+
+帮我做一个好看的个人主页网页，要求：
+- 深色主题，现代感设计
+- 页面居中显示我的名字："张三"
+- 下面有个人简介：热爱创作的学习者/从业者
+- 有3个爱好的卡片展示（打游戏、看电影、敲代码）
+- 底部有我的联系方式
+- 用一个HTML文件搞定，内联CSS
+  </div>
+  <p style="margin-top:20px; color:var(--text-secondary); font-size:1.05em;">
+    然后……<span style="color:var(--accent-green);">看AI表演！</span> 🍿
+  </p>
+</div>
+
+<!-- ==================== SLIDE 16: 演示后讲解 ==================== -->
+<div class="slide" id="slide-16">
+  <span class="section-tag tag-demo">🖥️ 演示</span>
+  <h2>刚才发生了什么？</h2>
+  <ul class="step-list" style="margin-top:20px;">
+    <li>
+      <span class="step-num">1</span>
+      <div>
+        <b>我用自然语言描述了需求</b><br>
+        <span style="color:var(--text-secondary);">没有写任何代码，只是"说"了我想要什么</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">2</span>
+      <div>
+        <b>AI理解了需求，自动生成了完整代码</b><br>
+        <span style="color:var(--text-secondary);">HTML + CSS，可能有几十上百行</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">3</span>
+      <div>
+        <b>AI自动创建了文件并保存</b><br>
+        <span style="color:var(--text-secondary);">Agent模式下AI会直接操作你的项目</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">4</span>
+      <div>
+        <b>我们直接打开浏览器预览</b><br>
+        <span style="color:var(--text-secondary);">一个漂亮的网页就出来了！</span>
+      </div>
+    </li>
+  </ul>
+  <p style="margin-top:25px; font-size:1.2em; color:var(--accent-green);">
+    ✅ 这就是Vibe Coding的核心循环：<b>描述 → 生成 → 预览 → 迭代</b>
+  </p>
+</div>
+
+<!-- ==================== SLIDE 17: 不满意怎么办 ==================== -->
+<div class="slide" id="slide-17">
+  <span class="section-tag tag-demo">🖥️ 演示</span>
+  <h2>不满意？继续"说"就行！</h2>
+  <p class="subtitle" style="margin-bottom:15px;">Vibe Coding的核心就是<b>迭代对话</b></p>
+  <div style="max-width:700px; width:100%;">
+    <div class="code-block" style="margin-bottom:12px;">
+<span class="comment">// 修改颜色</span>
+背景色太暗了，换成深蓝色，名字用渐变色显示
+    </div>
+    <div class="code-block" style="margin-bottom:12px;">
+<span class="comment">// 加功能</span>
+给页面加一个深色/浅色模式切换按钮
+    </div>
+    <div class="code-block" style="margin-bottom:12px;">
+<span class="comment">// 修复Bug</span>
+手机上看这个页面排版乱了，帮我做成响应式的
+    </div>
+    <div class="code-block">
+<span class="comment">// 加动画</span>
+卡片加一个鼠标悬停的放大动画效果
+    </div>
+  </div>
+  <p style="margin-top:20px; color:var(--accent-orange);">
+    💡 <b>关键心态</b>：不要追求一次生成完美，而是通过对话不断迭代！
+  </p>
+</div>
+
+<!-- ==================== SLIDE 18: 进入实操 ==================== -->
+<div class="slide full-center" id="slide-18">
+  <div class="slide-bg-glow glow-green"></div>
+  <span class="section-tag tag-practice">🛠️ 实操</span>
+  <div class="big-emoji">👨‍💻</div>
+  <h1 class="cool-gradient">轮到你了！</h1>
+  <h3>动手做你的第一个AI编程作品</h3>
+</div>
+
+<!-- ==================== SLIDE 19: 实操任务 ==================== -->
+<div class="slide" id="slide-19">
+  <span class="section-tag tag-practice">🛠️ 实操</span>
+  <h2>🎯 任务：用AI做一个「个人介绍网页」</h2>
+  <div class="practice-box" style="margin-top:15px;">
+    <h4>📋 基本要求</h4>
+    <ul>
+      <li>包含你的<b>名字</b>（或昵称）</li>
+      <li>一段<b>自我介绍</b>（你的背景/身份、兴趣等）</li>
+      <li>至少<b>3个爱好</b>的展示（用卡片、图标或列表都行）</li>
+      <li>页面要<b>好看</b>！（深色主题或其他你喜欢的风格）</li>
+    </ul>
+  </div>
+  <div class="practice-box" style="margin-top:15px; border-color: rgba(139,92,246,0.3);">
+    <h4 style="color:var(--accent-purple);">⭐ 进阶挑战（能做多少做多少）</h4>
+    <ul>
+      <li>加入一张照片（可以用网络图片占位）</li>
+      <li>加入暗色/亮色模式切换</li>
+      <li>加入鼠标悬停动画效果</li>
+      <li>让页面支持手机浏览（响应式设计）</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 20: 实操提示 ==================== -->
+<div class="slide" id="slide-20">
+  <span class="section-tag tag-practice">🛠️ 实操</span>
+  <h2>💡 实操Tips</h2>
+  <div class="content-grid" style="margin-top:15px;">
+    <div class="card">
+      <h4>✅ 好的做法</h4>
+      <ul style="padding-left:18px; margin-top:10px;">
+        <li>描述清楚你想要什么</li>
+        <li>一次只提一个修改</li>
+        <li>不满意就继续对话</li>
+        <li>大胆尝试，不怕搞砸</li>
+        <li>出错了让AI帮你修</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>❌ 要避免的</h4>
+      <ul style="padding-left:18px; margin-top:10px;">
+        <li>描述太模糊："给我弄好看点"</li>
+        <li>一次提太多要求</li>
+        <li>完全不看AI生成的代码</li>
+        <li>卡住了闷头想——举手问！</li>
+        <li>觉得自己不行——你行的！</li>
+      </ul>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:20px; text-align:center;">
+    <p style="font-size:1.1em;">
+      ⏱️ <b>提示：</b> 遇到问题随时举手 ｜ 做完基础版的挑战进阶版！
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 21: 实操参考Prompt ==================== -->
+<div class="slide" id="slide-21">
+  <span class="section-tag tag-practice">🛠️ 实操</span>
+  <h2>不知道怎么开口？参考这个</h2>
+  <div class="code-block" style="margin-top:20px; font-size:1em; max-width:850px;">
+<span class="comment">// 复制这段话，修改成你自己的信息，粘贴到TRAE的Agent对话框：</span>
+
+帮我创建一个个人介绍网页（单个HTML文件，内联CSS），要求：
+
+1. 深色主题，现代简约风格
+2. 页面居中布局
+3. 顶部显示我的名字：[你的名字]
+4. 名字下面是个人简介：[一句话自我介绍/你的背景]
+5. 中间用卡片展示我的3个爱好：
+   - [爱好1]
+   - [爱好2]  
+   - [爱好3]
+6. 底部有联系方式（可以写邮箱或QQ）
+7. 整体设计要好看，有高级感
+  </div>
+  <p style="margin-top:15px; color:var(--accent-green); font-size:1.05em;">
+    💡 把方括号里的内容换成你自己的信息，然后发送给AI！
+  </p>
+</div>
+
+<!-- ==================== SLIDE 22: 总结 ==================== -->
+<div class="slide full-center" id="slide-22">
+  <div class="slide-bg-glow glow-blue"></div>
+  <span class="section-tag tag-summary">📝 总结</span>
+  <h1>今天你学到了什么？</h1>
+  <div style="max-width:700px; text-align:left; margin-top:25px;">
+    <ul class="emoji-list">
+      <li>✅ AI编程的发展历程——从Copilot到Agent</li>
+      <li>✅ Vibe Coding是什么——用自然语言"指挥"AI写代码</li>
+      <li>✅ 安装和使用TRAE——你的AI编程工具</li>
+      <li>✅ 完成了第一个AI编程作品——个人介绍网页</li>
+      <li>✅ 核心循环：<b>描述 → 生成 → 预览 → 迭代</b></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 23: 课后任务 ==================== -->
+<div class="slide" id="slide-23">
+  <span class="section-tag tag-summary">📝 课后任务</span>
+  <h2>🏠 课后挑战</h2>
+  <div class="practice-box" style="margin-top:20px;">
+    <h4>完善你的个人介绍网页</h4>
+    <ul>
+      <li>加入更多内容（技能树、项目经历、座右铭等）</li>
+      <li>尝试不同的设计风格（赛博朋克？极简？可爱？）</li>
+      <li>加入一些交互效果（点击、悬停、动画）</li>
+      <li>试试让AI帮你加入一个"留言板"功能</li>
+    </ul>
+  </div>
+  <div class="highlight-box" style="margin-top:20px;">
+    <p style="font-size:1.1em;">
+      💡 <b>探索精神很重要</b>：不要怕搞砸！最坏的结果就是让AI重新生成。<br>
+      多和AI对话，多尝试不同的描述方式，你会越来越熟练的。
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 24: 下节预告 ==================== -->
+<div class="slide full-center" id="slide-24">
+  <div class="slide-bg-glow glow-purple"></div>
+  <span class="section-tag tag-summary">📝 预告</span>
+  <h2>📺 下节课预告</h2>
+  <h1 style="margin-top:10px;">和AI搭档编程<br>Vibe Coding核心技能</h1>
+  <div style="margin-top:30px; max-width:600px;">
+    <ul class="emoji-list" style="text-align:left;">
+      <li>🗣️ 如何和AI"说话"——Prompt技巧</li>
+      <li>🔧 Git版本控制——代码的"时光机"</li>
+      <li>🏗️ 实战项目——从零做一个完整的Web应用</li>
+      <li>🐛 Debug——当AI犯错时怎么办</li>
+    </ul>
+  </div>
+  <p style="margin-top:40px; font-size:1.3em; color:var(--accent-blue);">下节课见！🚀</p>
+</div>
+
+<!-- ==================== 导航控件 ==================== -->
+<div class="slide-number" id="slideNumber">1 / 24</div>
+<div class="progress-bar" id="progressBar" style="width: 0%"></div>
+<div class="nav-hint">← → 方向键翻页 ｜ F 全屏</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slideNumber').textContent = (current + 1) + ' / ' + slides.length;
+    document.getElementById('progressBar').style.width = ((current + 1) / slides.length * 100) + '%';
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault();
+      showSlide(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      showSlide(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      showSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      showSlide(slides.length - 1);
+    } else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  });
+
+  // Touch support for mobile
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? showSlide(current + 1) : showSlide(current - 1);
+    }
+  });
+
+  // Click navigation
+  document.addEventListener('click', (e) => {
+    const x = e.clientX / window.innerWidth;
+    if (x > 0.75) showSlide(current + 1);
+    else if (x < 0.25) showSlide(current - 1);
+  });
+
+  showSlide(0);
+</script>
+</body>
+</html>

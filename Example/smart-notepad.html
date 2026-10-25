@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能记事本 - Vibe Coding</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-card: #1a2332;
+    --bg-input: #0f172a;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-orange: #f59e0b;
+    --border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    background: var(--bg-card);
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .header h1 {
+    font-size: 1.5em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+  }
+
+  .btn-secondary {
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--accent-blue);
+  }
+
+  .btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-red);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .btn-danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
+    max-height: calc(100vh - 80px);
+  }
+
+  .sidebar {
+    width: 300px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .sidebar h3 {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .note-list {
+    list-style: none;
+  }
+
+  .note-item {
+    background: var(--bg-input);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .note-item:hover {
+    border-color: var(--accent-blue);
+    background: rgba(59, 130, 246, 0.05);
+  }
+
+  .note-item.active {
+    border-color: var(--accent-purple);
+    background: rgba(139, 92, 246, 0.1);
+  }
+
+  .note-item .note-title {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .note-item .note-preview {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .note-item .note-date {
+    font-size: 0.75em;
+    color: var(--text-secondary);
+    margin-top: 5px;
+  }
+
+  .editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    overflow-y: auto;
+  }
+
+  .editor input,
+  .editor textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    outline: none;
+  }
+
+  .editor input {
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .editor textarea {
+    flex: 1;
+    font-size: 1.1em;
+    line-height: 1.7;
+    resize: none;
+    min-height: 400px;
+  }
+
+  .editor input::placeholder,
+  .editor textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+  }
+
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+  }
+
+  .empty-state .icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    opacity: 0.3;
+  }
+
+  .empty-state h3 {
+    font-size: 1.3em;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+  }
+
+  .empty-state p {
+    font-size: 1em;
+  }
+
+  .search-bar {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9em;
+    margin-bottom: 20px;
+    outline: none;
+  }
+
+  .search-bar:focus {
+    border-color: var(--accent-blue);
+  }
+
+  .search-bar::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      flex-direction: column;
+    }
+    .sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid var(--border-color);
+      max-height: 200px;
+    }
+    .editor {
+      padding: 20px;
+    }
+    .editor input {
+      font-size: 1.5em;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>📝 智能记事本</h1>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="createNote()">+ 新建笔记</button>
+      <button class="btn btn-danger" onclick="deleteNote()" id="deleteBtn" style="display:none;">🗑️ 删除</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="sidebar">
+      <input type="text" class="search-bar" placeholder="🔍 搜索笔记..." oninput="searchNotes()">
+      <h3>我的笔记</h3>
+      <ul class="note-list" id="noteList">
+      </ul>
+    </div>
+
+    <div class="editor" id="editor">
+      <div class="empty-state">
+        <div class="icon">📄</div>
+        <h3>选择一个笔记开始编辑</h3>
+        <p>或者点击上方按钮创建新笔记</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let notes = JSON.parse(localStorage.getItem('smart-notes')) || [
+      {
+        id: 1,
+        title: '欢迎使用智能记事本',
+        content: '这是一个使用AI编程创建的智能记事本应用！\n\n功能特点：\n- 📝 创建和编辑笔记\n- 💾 自动保存到本地\n- 🔍 搜索笔记\n- 🗑️ 删除笔记\n- 📱 响应式设计\n\n所有数据都保存在你的浏览器本地存储中，刷新页面不会丢失。',
+        date: '2026-07-13'
+      },
+      {
+        id: 2,
+        title: 'Vibe Coding 学习笔记',
+        content: '今天学习了Vibe Coding，感觉非常神奇！\n\n核心要点：\n1. 用自然语言描述需求\n2. AI帮你写代码\n3. 你看效果，告诉AI哪里不对\n4. AI帮你修，继续迭代\n\n学习周期：几分钟入门！\n\n工具推荐：\n- TRAE（免费，国内直连）\n- Cursor（功能强，部分付费）\n\n关键心态：不要追求一次生成完美，而是通过对话不断迭代！',
+        date: '2026-07-13'
+      },
+      {
+        id: 3,
+        title: '待办事项',
+        content: '- [x] 完成个人介绍网页\n- [x] 创建智能记事本\n- [ ] 复习今天学习的内容\n- [ ] 尝试做一个小游戏',
+        date: '2026-07-13'
+      }
+    ];
+
+    let currentNoteId = null;
+
+    function saveNotes() {
+      localStorage.setItem('smart-notes', JSON.stringify(notes));
+    }
+
+    function renderNotes(filterText = '') {
+      const noteList = document.getElementById('noteList');
+      noteList.innerHTML = '';
+
+      const filteredNotes = notes.filter(note => 
+        note.title.toLowerCase().includes(filterText.toLowerCase()) ||
+        note.content.toLowerCase().includes(filterText.toLowerCase())
+      );
+
+      filteredNotes.forEach(note => {
+        const li = document.createElement('li');
+        li.className = `note-item ${note.id === currentNoteId ? 'active' : ''}`;
+        li.innerHTML = `
+          <div class="note-title">${note.title}</div>
+          <div class="note-preview">${note.content.substring(0, 50)}${note.content.length > 50 ? '...' : ''}</div>
+          <div class="note-date">${note.date}</div>
+        `;
+        li.onclick = () => openNote(note.id);
+        noteList.appendChild(li);
+      });
+    }
+
+    function openNote(id) {
+      currentNoteId = id;
+      const note = notes.find(n => n.id === id);
+      if (!note) return;
+
+      document.getElementById('deleteBtn').style.display = 'block';
+
+      const editor = document.getElementById('editor');
+      editor.innerHTML = `
+        <input type="text" id="noteTitle" value="${note.title}" oninput="updateNote()">
+        <textarea id="noteContent" oninput="updateNote()">${note.content}</textarea>
+      `;
+
+      renderNotes();
+    }
+
+    function createNote() {
+      const newNote = {
+        id: Date.now(),
+        title: '新建笔记',
+        content: '',
+        date: new Date().toISOString().split('T')[0]
+      };
+      notes.unshift(newNote);
+      saveNotes();
+      openNote(newNote.id);
+    }
+
+    function deleteNote() {
+      if (!currentNoteId) return;
+      if (!confirm('确定要删除这个笔记吗？')) return;
+
+      notes = notes.filter(n => n.id !== currentNoteId);
+      saveNotes();
+      currentNoteId = null;
+      document.getElementById('deleteBtn').style.display = 'none';
+
+      const editor = document.getElementById('editor');
+      editor.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📄</div>
+          <h3>选择一个笔记开始编辑</h3>
+          <p>或者点击上方按钮创建新笔记</p>
+        </div>
+      `;
+
+      renderNotes();
+    }
+
+    function updateNote() {
+      if (!currentNoteId) return;
+      const note = notes.find(n => n.id === currentNoteId);
+      if (!note) return;
+
+      note.title = document.getElementById('noteTitle').value || '未命名笔记';
+      note.content = document.getElementById('noteContent').value;
+      note.date = new Date().toISOString().split('T')[0];
+      
+      saveNotes();
+      renderNotes();
+    }
+
+    function searchNotes() {
+      const searchBar = document.querySelector('.search-bar');
+      renderNotes(searchBar.value);
+    }
+
+    renderNotes();
+  </script>
+</body>
+</html>

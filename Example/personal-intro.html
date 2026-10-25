@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人介绍 - Vibe Coding</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-card: #1a2332;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-green: #10b981;
+    --accent-orange: #f59e0b;
+    --gradient-main: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header .avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--gradient-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 30px rgba(139, 92, 246, 0.3);
+  }
+
+  .header h1 {
+    font-size: 2.2em;
+    font-weight: 700;
+    background: var(--gradient-main);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+
+  .header .title {
+    font-size: 1.1em;
+    color: var(--text-secondary);
+  }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .card h3 {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    color: var(--accent-blue);
+  }
+
+  .card p {
+    font-size: 1.05em;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  .hobbies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .hobby-card {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .hobby-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+  }
+
+  .hobby-card .icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+  }
+
+  .hobby-card .name {
+    font-size: 1em;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 1em;
+  }
+
+  .contact-item span {
+    color: var(--accent-green);
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+  }
+
+  .theme-toggle:hover {
+    background: var(--accent-purple);
+    border-color: var(--accent-purple);
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 20px 15px; }
+    .header h1 { font-size: 1.8em; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 切换主题</button>
+
+  <div class="container">
+    <div class="header">
+      <div class="avatar">👨‍💻</div>
+      <h1>张三</h1>
+      <p class="title">热爱创作的学习者 / 全栈开发者</p>
+    </div>
+
+    <div class="card">
+      <h3>关于我</h3>
+      <p>我是一名热爱技术的学习者，喜欢探索各种有趣的编程技术。我相信技术可以改变世界，而AI编程让每个人都能成为创造者。平时喜欢用AI工具快速实现自己的想法，从网页到小程序，从数据分析到自动化脚本。</p>
+    </div>
+
+    <div class="card">
+      <h3>我的爱好</h3>
+      <div class="hobbies-grid">
+        <div class="hobby-card">
+          <div class="icon">🎮</div>
+          <div class="name">打游戏</div>
+        </div>
+        <div class="hobby-card">
+          <div class="icon">🎬</div>
+          <div class="name">看电影</div>
+        </div>
+        <div class="hobby-card">
+          <div class="icon">💻</div>
+          <div class="name">敲代码</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>联系方式</h3>
+      <div class="contact-info">
+        <div class="contact-item"><span>📧</span> zhangsan@example.com</div>
+        <div class="contact-item"><span>💬</span> QQ: 123456789</div>
+        <div class="contact-item"><span>🔗</span> GitHub: zhangsan</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const root = document.documentElement;
+      const isDark = root.style.getPropertyValue('--bg-primary') !== '#ffffff';
+      
+      if (isDark) {
+        root.style.setProperty('--bg-primary', '#ffffff');
+        root.style.setProperty('--bg-card', '#f8fafc');
+        root.style.setProperty('--text-primary', '#1e293b');
+        root.style.setProperty('--text-secondary', '#64748b');
+      } else {
+        root.style.setProperty('--bg-primary', '#0a0e17');
+        root.style.setProperty('--bg-card', '#1a2332');
+        root.style.setProperty('--text-primary', '#e2e8f0');
+        root.style.setProperty('--text-secondary', '#94a3b8');
+      }
+    }
+  </script>
+</body>
+</html>

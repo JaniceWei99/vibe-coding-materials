@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness：AI原生软件交付平台</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Fira+Code:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-card: #1a2332;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-green: #10b981;
+    --accent-orange: #f59e0b;
+    --accent-pink: #ec4899;
+    --accent-red: #ef4444;
+    --accent-cyan: #06b6d4;
+    --accent-amber: #f59e0b;
+    --gradient-main: linear-gradient(135deg, #f59e0b, #ef4444);
+    --gradient-cool: linear-gradient(135deg, #3b82f6, #06b6d4);
+    --gradient-warm: linear-gradient(135deg, #f59e0b, #ec4899);
+    --gradient-fire: linear-gradient(135deg, #ef4444, #f59e0b);
+    --gradient-purple: linear-gradient(135deg, #8b5cf6, #ec4899);
+  }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .slide {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    padding: 60px 80px;
+    position: relative;
+    animation: fadeIn 0.4s ease;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-number { position: fixed; bottom: 20px; right: 30px; font-size: 14px; color: var(--text-secondary); font-family: 'Fira Code', monospace; z-index: 100; }
+  .progress-bar { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--gradient-main); transition: width 0.4s ease; z-index: 100; }
+  .nav-hint { position: fixed; bottom: 20px; left: 30px; font-size: 13px; color: var(--text-secondary); opacity: 0.5; z-index: 100; }
+
+  .section-tag { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; margin-bottom: 20px; letter-spacing: 1px; }
+  .tag-lecture { background: rgba(59,130,246,0.15); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.3); }
+  .tag-demo { background: rgba(139,92,246,0.15); color: var(--accent-purple); border: 1px solid rgba(139,92,246,0.3); }
+  .tag-practice { background: rgba(16,185,129,0.15); color: var(--accent-green); border: 1px solid rgba(16,185,129,0.3); }
+  .tag-summary { background: rgba(245,158,11,0.15); color: var(--accent-orange); border: 1px solid rgba(245,158,11,0.3); }
+  .tag-story { background: rgba(239,68,68,0.15); color: var(--accent-red); border: 1px solid rgba(239,68,68,0.3); }
+  .tag-agent { background: rgba(139,92,246,0.15); color: var(--accent-purple); border: 1px solid rgba(139,92,246,0.3); }
+
+  h1 { font-size: 3.2em; font-weight: 900; line-height: 1.2; margin-bottom: 20px; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  h1.cool-gradient { background: var(--gradient-cool); -webkit-background-clip: text; background-clip: text; }
+  h1.warm-gradient { background: var(--gradient-warm); -webkit-background-clip: text; background-clip: text; }
+  h1.fire-gradient { background: var(--gradient-fire); -webkit-background-clip: text; background-clip: text; }
+  h1.purple-gradient { background: var(--gradient-purple); -webkit-background-clip: text; background-clip: text; }
+  h2 { font-size: 2.2em; font-weight: 700; margin-bottom: 16px; }
+  h3 { font-size: 1.5em; font-weight: 500; color: var(--text-secondary); margin-bottom: 30px; }
+  .subtitle { font-size: 1.4em; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.6; }
+  .big-emoji { font-size: 4em; margin-bottom: 20px; }
+
+  .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; max-width: 1100px; margin-top: 10px; }
+  .content-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
+  .content-grid.four-col { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .card { background: var(--bg-card); border-radius: 16px; padding: 28px; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s, box-shadow 0.2s; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+  .card .card-icon { font-size: 2em; margin-bottom: 12px; }
+  .card h4 { font-size: 1.15em; font-weight: 700; margin-bottom: 10px; }
+  .card p, .card li { font-size: 0.95em; color: var(--text-secondary); line-height: 1.7; }
+
+  .code-block { background: #1e293b; border-radius: 12px; padding: 24px 28px; font-family: 'Fira Code', monospace; font-size: 0.95em; line-height: 1.8; border: 1px solid rgba(255,255,255,0.06); max-width: 800px; width: 100%; margin: 15px 0; overflow-x: auto; white-space: pre; }
+  .code-block .comment { color: #6b7280; }
+  .code-block .keyword { color: #c084fc; }
+  .code-block .string { color: #34d399; }
+  .code-block .function { color: #60a5fa; }
+  .code-block .value { color: #fbbf24; }
+  .code-block .bad { color: #ef4444; text-decoration: line-through; opacity: 0.7; }
+  .code-block .good { color: #10b981; }
+
+  .highlight-box { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1)); border: 1px solid rgba(245,158,11,0.2); border-radius: 16px; padding: 30px 40px; max-width: 800px; margin: 15px 0; }
+  .highlight-box.blue { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(6,182,212,0.1)); border-color: rgba(59,130,246,0.2); }
+  .highlight-box.purple { background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(236,72,153,0.1)); border-color: rgba(139,92,246,0.2); }
+
+  .step-list { list-style: none; max-width: 800px; width: 100%; }
+  .step-list li { display: flex; align-items: flex-start; margin-bottom: 18px; font-size: 1.15em; line-height: 1.5; }
+  .step-list .step-num { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border-radius: 50%; background: var(--gradient-main); color: white; font-weight: 700; font-size: 0.85em; margin-right: 16px; flex-shrink: 0; }
+
+  .vs-container { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: stretch; max-width: 950px; width: 100%; }
+  .vs-divider { font-size: 2em; font-weight: 900; display: flex; align-items: center; background: var(--gradient-warm); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  .quote-box { background: var(--bg-card); border-left: 4px solid var(--accent-orange); border-radius: 0 12px 12px 0; padding: 30px 40px; max-width: 800px; margin: 20px 0; }
+  .quote-box .quote-text { font-size: 1.25em; font-style: italic; line-height: 1.6; }
+  .quote-box .quote-author { margin-top: 15px; font-size: 1em; color: var(--accent-orange); font-weight: 500; }
+
+  .practice-box { background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.08)); border: 2px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 35px 45px; max-width: 850px; width: 100%; }
+  .practice-box h4 { color: var(--accent-green); font-size: 1.3em; margin-bottom: 15px; }
+  .practice-box p, .practice-box li { font-size: 1.05em; line-height: 1.7; color: var(--text-primary); }
+  .practice-box ul { padding-left: 20px; margin-top: 10px; }
+  .practice-box li { margin-bottom: 8px; }
+
+  .full-center { text-align: center; }
+  .emoji-list { list-style: none; max-width: 800px; }
+  .emoji-list li { font-size: 1.15em; margin-bottom: 14px; line-height: 1.5; padding-left: 5px; }
+
+  .table-simple { border-collapse: collapse; max-width: 900px; width: 100%; margin: 15px 0; }
+  .table-simple th, .table-simple td { padding: 14px 20px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 1em; }
+  .table-simple th { color: var(--accent-orange); font-weight: 600; }
+  .table-simple td { color: var(--text-secondary); }
+
+  .agent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 1200px; margin-top: 15px; }
+  .agent-card { background: var(--bg-card); border-radius: 16px; padding: 24px; border: 2px solid rgba(139,92,246,0.2); transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+  .agent-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gradient-purple); }
+  .agent-card:hover { transform: translateY(-3px); box-shadow: 0 10px 40px rgba(139,92,246,0.2); }
+  .agent-card .agent-role { font-size: 0.85em; color: var(--accent-purple); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .agent-card .agent-name { font-size: 1.2em; font-weight: 700; margin-bottom: 12px; }
+  .agent-card .agent-tasks { font-size: 0.9em; color: var(--text-secondary); line-height: 1.6; }
+  .agent-card .agent-tasks li { margin-bottom: 6px; }
+
+  .team-diagram { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; max-width: 1100px; margin: 20px 0; }
+  .team-member { background: var(--bg-card); border-radius: 12px; padding: 15px 20px; border: 1px solid rgba(255,255,255,0.06); text-align: center; min-width: 100px; }
+  .team-member .avatar { font-size: 2em; margin-bottom: 8px; }
+  .team-member .name { font-size: 0.9em; font-weight: 600; }
+  .team-member .role { font-size: 0.8em; color: var(--text-secondary); }
+
+  .slide-bg-glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; filter: blur(120px); opacity: 0.07; pointer-events: none; }
+  .glow-orange { background: var(--accent-orange); top: -100px; right: -100px; }
+  .glow-red { background: var(--accent-red); bottom: -100px; left: -100px; }
+  .glow-blue { background: var(--accent-blue); top: -100px; left: -100px; }
+  .glow-cyan { background: var(--accent-cyan); bottom: -100px; right: -100px; }
+  .glow-purple { background: var(--accent-purple); top: -100px; right: -100px; }
+
+  @media (max-width: 768px) {
+    .slide { padding: 30px 25px; }
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.5em; }
+    .content-grid, .content-grid.three-col, .content-grid.four-col { grid-template-columns: 1fr; }
+    .vs-container { grid-template-columns: 1fr; }
+    .card { padding: 20px; }
+    .agent-grid { grid-template-columns: 1fr; }
+  }
+  @media print {
+    .slide { display: flex !important; page-break-after: always; height: auto; min-height: 100vh; }
+    .nav-hint, .slide-number, .progress-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== SLIDE 1: 封面 ==================== -->
+<div class="slide active full-center" id="slide-1">
+  <div class="slide-bg-glow glow-purple"></div>
+  <div class="slide-bg-glow glow-orange"></div>
+  <p style="font-size:1.1em; color:var(--accent-purple); letter-spacing:3px; margin-bottom:30px;">VIBE CODING 微课堂 · 进阶篇</p>
+  <h1 style="font-size:3.5em; background:var(--gradient-purple); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">Harness<br>AI原生软件交付平台</h1>
+  <h3 style="margin-top:10px;">你的虚拟工程团队</h3>
+  <div style="margin-top:50px; color:var(--text-secondary); font-size:0.95em;">
+    <p>按 <kbd style="background:var(--bg-card);padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);">→</kbd> 开始 · 按 <kbd style="background:var(--bg-card);padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);">←</kbd> 后退</p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 2: 问题引入 ==================== -->
+<div class="slide full-center" id="slide-2">
+  <span class="section-tag tag-story">🤔 思考</span>
+  <div class="big-emoji">🏗️</div>
+  <h1 class="purple-gradient">一个人能建起一座城市吗？</h1>
+  <div style="max-width:700px; margin-top:20px;">
+    <p style="font-size:1.3em; line-height:1.8; color:var(--text-secondary);">
+      写代码只是软件开发的一部分。<br>
+      要把代码变成<b style="color:var(--text-primary);">用户能用的产品</b>，你需要：<br><br>
+      <span style="font-size:1em; color:var(--text-secondary);">
+        👨‍💻 开发 · 👩‍🔬 测试 · 🛡️ 安全 · 🚀 部署 · 📊 监控 · 💰 成本优化
+      </span>
+    </p>
+  </div>
+  <div class="highlight-box purple" style="margin-top:30px;">
+    <p style="font-size:1.1em;">
+      传统做法：雇佣一个<b>完整的工程团队</b>（至少6-10人）<br>
+      <span style="color:var(--accent-purple); font-size:0.95em;">→ 成本高、沟通难、招聘慢</span>
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 3: 虚拟团队概念 ==================== -->
+<div class="slide" id="slide-3">
+  <span class="section-tag tag-agent">🤖 AI Agents</span>
+  <h2>如果……这些工作由AI来做？</h2>
+  <div class="vs-container" style="margin-top:25px;">
+    <div>
+      <h4 style="color:var(--accent-red); margin-bottom:15px;">传统工程团队</h4>
+      <div class="team-diagram">
+        <div class="team-member"><div class="avatar">👨‍💻</div><div class="name">张三</div><div class="role">开发</div></div>
+        <div class="team-member"><div class="avatar">👩‍🔬</div><div class="name">李四</div><div class="role">测试</div></div>
+        <div class="team-member"><div class="avatar">🛡️</div><div class="name">王五</div><div class="role">安全</div></div>
+        <div class="team-member"><div class="avatar">🚀</div><div class="name">赵六</div><div class="role">部署</div></div>
+        <div class="team-member"><div class="avatar">📊</div><div class="name">孙七</div><div class="role">监控</div></div>
+        <div class="team-member"><div class="avatar">💰</div><div class="name">周八</div><div class="role">FinOps</div></div>
+      </div>
+      <p style="margin-top:15px; color:var(--text-secondary); font-size:0.9em;">需要6个人，月薪合计约30万+</p>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div>
+      <h4 style="color:var(--accent-green); margin-bottom:15px;">Harness AI虚拟团队</h4>
+      <div class="team-diagram">
+        <div class="team-member" style="border-color:rgba(139,92,246,0.3);"><div class="avatar">🤖</div><div class="name">AIDA</div><div class="role">全能</div></div>
+      </div>
+      <p style="margin-top:15px; color:var(--text-secondary); font-size:0.9em;">1个平台，6种AI Agent，随时待命</p>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:25px; text-align:center;">
+    <p style="font-size:1.2em;">
+      <b style="color:var(--accent-orange);">Harness = 你的虚拟工程团队</b><br>
+      <span style="font-size:0.95em; color:var(--text-secondary);">用AI Agent替代传统角色，覆盖整个软件交付生命周期</span>
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 4: AI Agent团队介绍 ==================== -->
+<div class="slide" id="slide-4">
+  <div class="slide-bg-glow glow-purple"></div>
+  <span class="section-tag tag-agent">🤖 认识你的团队</span>
+  <h1 class="purple-gradient">Harness AI Agent团队</h1>
+  <p style="font-size:1.2em; color:var(--text-secondary); margin-top:15px;">6个专业角色，覆盖软件交付全流程</p>
+  <div class="agent-grid" style="margin-top:25px;">
+    <div class="agent-card" style="border-color:rgba(59,130,246,0.3);">
+      <div class="agent-role" style="color:var(--accent-blue);">Code Agent</div>
+      <div class="agent-name">💻 代码助手</div>
+      <ul class="agent-tasks">
+        <li>• 智能补全</li>
+        <li>• 代码解释</li>
+        <li>• 自动Debug</li>
+        <li>• 代码审查</li>
+        <li>• PR摘要</li>
+      </ul>
+    </div>
+    <div class="agent-card" style="border-color:rgba(16,185,129,0.3);">
+      <div class="agent-role" style="color:var(--accent-green);">Build & Test Agent</div>
+      <div class="agent-name">🧪 构建测试</div>
+      <ul class="agent-tasks">
+        <li>• 故障排查</li>
+        <li>• 代码分析</li>
+        <li>• 自动生成测试</li>
+        <li>• CI流水线生成</li>
+      </ul>
+    </div>
+    <div class="agent-card" style="border-color:rgba(245,158,11,0.3);">
+      <div class="agent-role" style="color:var(--accent-orange);">Secure Agent</div>
+      <div class="agent-name">🛡️ 安全专家</div>
+      <ul class="agent-tasks">
+        <li>• 漏洞解释</li>
+        <li>• 自动修复</li>
+        <li>• 安全扫描</li>
+        <li>• 合规检查</li>
+      </ul>
+    </div>
+    <div class="agent-card" style="border-color:rgba(236,72,153,0.3);">
+      <div class="agent-role" style="color:var(--accent-pink);">Deploy Agent</div>
+      <div class="agent-name">🚀 部署专家</div>
+      <ul class="agent-tasks">
+        <li>• CD流水线生成</li>
+        <li>• Feature Flags</li>
+        <li>• 自动部署</li>
+        <li>• 灰度发布</li>
+      </ul>
+    </div>
+    <div class="agent-card" style="border-color:rgba(239,68,68,0.3);">
+      <div class="agent-role" style="color:var(--accent-red);">Reliability Agent</div>
+      <div class="agent-name">📊 可靠性工程师</div>
+      <ul class="agent-tasks">
+        <li>• 混沌实验建议</li>
+        <li>• 自动根因分析</li>
+        <li>• 故障定位</li>
+        <li>• 性能优化</li>
+      </ul>
+    </div>
+    <div class="agent-card" style="border-color:rgba(6,182,212,0.3);">
+      <div class="agent-role" style="color:var(--accent-cyan);">Optimize Agent</div>
+      <div class="agent-name">💰 优化顾问</div>
+      <ul class="agent-tasks">
+        <li>• 云资产策略生成</li>
+        <li>• 成本监控</li>
+        <li>• SDLC洞察</li>
+        <li>• 流程优化</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 5: Code Agent详解 ==================== -->
+<div class="slide" id="slide-5">
+  <span class="section-tag tag-agent">🤖 Agent 1</span>
+  <h2 style="color:var(--accent-blue);">💻 Code Agent —— 代码助手</h2>
+  <p style="color:var(--text-secondary); margin-top:10px;">你写代码时的智能搭档</p>
+  <div class="content-grid" style="margin-top:20px;">
+    <div class="card" style="border-color:rgba(59,130,246,0.3);">
+      <h4>🎯 核心能力</h4>
+      <ul style="padding-left:18px; margin-top:10px;">
+        <li><b>智能补全</b>：预测你想写的代码</li>
+        <li><b>代码解释</b>：看不懂？让AI解释</li>
+        <li><b>自动Debug</b>：发现Bug并自动修复</li>
+        <li><b>代码审查</b>：自动检查代码质量</li>
+        <li><b>PR摘要</b>：自动生成Pull Request摘要</li>
+        <li><b>新人引导</b>：帮助新成员快速上手</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>💬 实际场景</h4>
+      <div class="code-block" style="max-width:100%; margin-top:10px; font-size:0.85em;">
+用户：这段代码是什么意思？
+
+AIDA：这段代码实现了一个
+用户认证中间件，主要做
+三件事：1.验证JWT令牌
+2.检查用户权限 3.记录
+访问日志。第15-20行是
+核心逻辑...</div>
+      <p style="margin-top:10px; font-size:0.9em;">像有个资深工程师坐在你旁边</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 6: Build & Test Agent详解 ==================== -->
+<div class="slide" id="slide-6">
+  <span class="section-tag tag-agent">🤖 Agent 2</span>
+  <h2 style="color:var(--accent-green);">🧪 Build & Test Agent —— 构建测试</h2>
+  <p style="color:var(--text-secondary); margin-top:10px;">保证代码质量的守门员</p>
+  <div class="content-grid" style="margin-top:20px;">
+    <div class="card" style="border-color:rgba(16,185,129,0.3);">
+      <h4>🎯 核心能力</h4>
+      <ul style="padding-left:18px; margin-top:10px;">
+        <li><b>故障排查</b>：构建失败？自动分析原因</li>
+        <li><b>代码分析</b>：提前发现问题代码</li>
+        <li><b>自动生成测试</b>：根据代码生成测试用例</li>
+        <li><b>CI流水线生成</b>：自动创建CI配置</li>
+        <li><b>测试覆盖率分析</b>：知道哪些代码没被测</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>💬 实际场景</h4>
+      <div class="code-block" style="max-width:100%; margin-top:10px; font-size:0.85em;">
+构建失败，错误信息：
+Module not found: 'lodash'
+
+AIDA：检测到依赖缺失。
+已自动修复：已添加lodash
+到package.json并运行npm
+install。是否重新构建？</div>
+      <p style="margin-top:10px; font-size:0.9em;">不用手动查日志，AI直接帮你修</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 7: Secure Agent详解 ==================== -->
+<div class="slide" id="slide-7">
+  <span class="section-tag tag-agent">🤖 Agent 3</span>
+  <h2 style="color:var(--accent-orange);">🛡️ Secure Agent —— 安全专家</h2>
+  <p style="color:var(--text-secondary); margin-top:10px;">24小时待命的安全顾问</p>
+  <div class="content-grid" style="margin-top:20px;">
+    <div class="card" style="border-color:rgba(245,158,11,0.3);">
+      <h4>🎯 核心能力</h4>
+      <ul style="padding-left:18px; margin-top:10px;">
+        <li><b>漏洞解释</b>：用通俗语言解释安全漏洞</li>
+        <li><b>自动修复</b>：一键修复常见安全问题</li>
+        <li><b>安全扫描</b>：自动扫描代码中的隐患</li>
+        <li><b>合规检查</b>：确保符合安全标准</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>💬 实际场景</h4>
+      <div class="code-block" style="max-width:100%; margin-top:10px; font-size:0.85em;">
+发现1个高危漏洞：CVE-2023-1234
+这是一个SQL注入漏洞，攻击者
+可以通过用户输入执行恶意
+SQL命令。
+
+AIDA：已生成修复补丁，
+将参数化查询替换原代码，
+是否应用？</div>
+      <p style="margin-top:10px; font-size:0.9em;">安全不再依赖专家，AI帮你把关</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 8: Deploy Agent详解 ==================== -->
+<div class="slide" id="slide-8">
+  <span class="section-tag tag-agent">🤖 Agent 4</span>
+  <h2 style="color:var(--accent-pink);">🚀 Deploy Agent —— 部署专家</h2>
+  <p style="color:var(--text-secondary); margin-top:10px;">安全上线的护航手</p>
+  <div class="content-grid" style="margin-top:20px;">
+    <div class="card" style="border-color:rgba(236,72,153,0.3);">
+      <h4>🎯 核心能力</h4>
+      <ul style="padding-left:18px; margin-top:10px;">
+        <li><b>CD流水线生成</b>：自动创建部署配置</li>
+        <li><b>Feature Flags</b>：智能管理功能开关</li>
+        <li><b>自动部署</b>：一键部署到多环境</li>
+        <li><b>灰度发布</b>：逐步放量，降低风险</li>
+        <li><b>回滚策略</b>：出问题自动回滚</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>💬 实际场景</h4>
+      <div class="code-block" style="max-width:100%; margin-top:10px; font-size:0.85em;">
+AIDA：检测到新版本已通过
+所有测试。建议部署策略：
+1. 先部署到10%用户
+2. 观察30分钟无异常
+3. 全量发布
+
+是否执行？</div>
+      <p style="margin-top:10px; font-size:0.9em;">像有个资深运维在帮你做决策</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 9: Reliability Agent详解 ==================== -->
+<div class="slide" id="slide-9">
+  <span class="section-tag tag-agent">🤖 Agent 5</span>
+  <h2 style="color:var(--accent-red);">📊 Reliability Agent —— 可靠性工程师</h2>
+  <p style="color:var(--text-secondary); margin-top:10px;">系统健康的守护者</p>
+  <div class="content-grid" style="margin-top:20px;">
+    <div class="card" style="border-color:rgba(239,68,68,0.3);">
+      <h4>🎯 核心能力</h4>
+      <ul style="padding-left:18px; margin-top:10px;">
+        <li><b>混沌实验建议</b>：主动测试系统韧性</li>
+        <li><b>自动根因分析(RCA)</b>：故障自动定位</li>
+        <li><b>故障定位</b>：快速找到问题根源</li>
+        <li><b>性能优化</b>：发现性能瓶颈</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>💬 实际场景</h4>
+      <div class="code-block" style="max-width:100%; margin-top:10px; font-size:0.85em;">
+系统告警：API响应时间>5s
+
+AIDA：正在分析...
+根因：数据库连接池耗尽
+建议：增加连接池大小，
+或优化慢查询。已生成
+修复方案，是否应用？</div>
+      <p style="margin-top:10px; font-size:0.9em;">不用半夜爬起来查日志，AI帮你分析</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 10: Optimize Agent详解 ==================== -->
+<div class="slide" id="slide-10">
+  <span class="section-tag tag-agent">🤖 Agent 6</span>
+  <h2 style="color:var(--accent-cyan);">💰 Optimize Agent —— 优化顾问</h2>
+  <p style="color:var(--text-secondary); margin-top:10px;">成本与效率的精算师</p>
+  <div class="content-grid" style="margin-top:20px;">
+    <div class="card" style="border-color:rgba(6,182,212,0.3);">
+      <h4>🎯 核心能力</h4>
+      <ul style="padding-left:18px; margin-top:10px;">
+        <li><b>云资产策略生成</b>：自动生成资源管理策略</li>
+        <li><b>成本监控</b>：实时追踪云成本变化</li>
+        <li><b>SDLC洞察</b>：分析整个交付流程</li>
+        <li><b>流程优化</b>：发现并改进低效环节</li>
+        <li><b>OPA策略生成</b>：自动生成合规策略</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>💬 实际场景</h4>
+      <div class="code-block" style="max-width:100%; margin-top:10px; font-size:0.85em;">
+AIDA：检测到本月云成本
+上涨30%。主要原因是：
+1. 开发环境未自动关机
+2. 冗余实例过多
+
+建议：实施自动关机策略
+，预计可节省40%成本。
+是否应用？</div>
+      <p style="margin-top:10px; font-size:0.9em;">不用等月底账单吓一跳，AI实时帮你省钱</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 11: 完整工作流演示 ==================== -->
+<div class="slide" id="slide-11">
+  <span class="section-tag tag-demo">🎬 实际工作流</span>
+  <h2>从写代码到上线：AI Agent协作演示</h2>
+  <div style="max-width:900px; margin-top:20px;">
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="year">1. 写代码</span>
+        <span class="event">Code Agent：智能补全 + 代码解释</span>
+      </div>
+      <div class="timeline-item">
+        <span class="year">2. 提交PR</span>
+        <span class="event">Code Agent：自动代码审查 + PR摘要</span>
+      </div>
+      <div class="timeline-item">
+        <span class="year">3. 触发CI</span>
+        <span class="event">Build & Test Agent：自动构建 + 生成测试</span>
+      </div>
+      <div class="timeline-item">
+        <span class="year">4. 安全扫描</span>
+        <span class="event">Secure Agent：漏洞检测 + 自动修复</span>
+      </div>
+      <div class="timeline-item">
+        <span class="year">5. 部署</span>
+        <span class="event">Deploy Agent：灰度发布 + Feature Flags</span>
+      </div>
+      <div class="timeline-item">
+        <span class="year">6. 监控</span>
+        <span class="event">Reliability Agent：故障检测 + 自动RCA</span>
+      </div>
+      <div class="timeline-item">
+        <span class="year">7. 优化</span>
+        <span class="event">Optimize Agent：成本分析 + 流程优化</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 12: 对比传统DevOps ==================== -->
+<div class="slide" id="slide-12">
+  <span class="section-tag tag-story">⚖️ 对比</span>
+  <h2>传统DevOps vs Harness AI</h2>
+  <div class="vs-container" style="margin-top:25px;">
+    <div>
+      <h4 style="color:var(--accent-red); margin-bottom:15px;">传统DevOps</h4>
+      <ul style="padding-left:20px; color:var(--text-secondary); line-height:2;">
+        <li>❌ 需要6-10个专业角色</li>
+        <li>❌ 每个角色都要培训</li>
+        <li>❌ 沟通成本高，容易出错</li>
+        <li>❌ 问题定位靠经验</li>
+        <li>❌ 成本高，招聘难</li>
+        <li>❌ 24/7值班压力</li>
+      </ul>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div>
+      <h4 style="color:var(--accent-green); margin-bottom:15px;">Harness AI</h4>
+      <ul style="padding-left:20px; color:var(--text-secondary); line-height:2;">
+        <li>✅ 1个平台 = 6个AI Agent</li>
+        <li>✅ AI即学即用，无需培训</li>
+        <li>✅ 自动协作，减少沟通</li>
+        <li>✅ 智能分析，精准定位</li>
+        <li>✅ 成本可控，按需付费</li>
+        <li>✅ 24/7自动监控</li>
+      </ul>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:25px;">
+    <p style="font-size:1.1em;">
+      <b>关键区别</b>：传统DevOps是"工具"，Harness AI是"团队"<br>
+      <span style="color:var(--text-secondary); font-size:0.95em;">工具需要人去用，团队会主动帮你解决问题</span>
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 13: 企业案例 ==================== -->
+<div class="slide" id="slide-13">
+  <span class="section-tag tag-story">📊 真实案例</span>
+  <h2>企业使用Harness的效果</h2>
+  <div class="content-grid" style="margin-top:20px;">
+    <div class="card">
+      <h4 style="color:var(--accent-purple);">🏦 某大型银行</h4>
+      <p style="margin-top:10px;">部署时间从<b>2小时</b>缩短到<b>5分钟</b></p>
+      <p style="margin-top:8px;">故障恢复时间减少<b>70%</b></p>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent-blue);">🛒 某电商平台</h4>
+      <p style="margin-top:10px;">每日部署次数从<b>2次</b>提升到<b>50次</b></p>
+      <p style="margin-top:8px;">云成本节省<b>40%</b></p>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent-green);">🎮 某游戏公司</h4>
+      <p style="margin-top:10px;">代码审查效率提升<b>3倍</b></p>
+      <p style="margin-top:8px;">安全漏洞修复时间减少<b>80%</b></p>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent-orange);">📱 某SaaS公司</h4>
+      <p style="margin-top:10px;">新员工上手时间从<b>2周</b>缩短到<b>2天</b></p>
+      <p style="margin-top:8px;">团队沟通成本降低<b>50%</b></p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 14: 为什么选择Harness ==================== -->
+<div class="slide" id="slide-14">
+  <div class="slide-bg-glow glow-purple"></div>
+  <span class="section-tag tag-summary">📝 总结</span>
+  <h1 class="purple-gradient">为什么选择Harness？</h1>
+  <div style="max-width:800px; margin-top:25px;">
+    <ul class="emoji-list">
+      <li>🤖 <b>AI原生</b>：从设计之初就融入AI，不是事后加的功能</li>
+      <li>👥 <b>虚拟团队</b>：6个专业Agent，替代传统工程团队</li>
+      <li>🔄 <b>全流程覆盖</b>：从代码到上线到监控，一个平台搞定</li>
+      <li>⚡ <b>开箱即用</b>：无需复杂配置，AI帮你自动生成</li>
+      <li>💰 <b>成本优化</b>：智能监控云成本，自动省钱</li>
+      <li>🚀 <b>持续进化</b>：AI模型不断学习，越用越聪明</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 15: 学习路径 ==================== -->
+<div class="slide" id="slide-15">
+  <span class="section-tag tag-summary">🎓 学习路径</span>
+  <h2>如何开始学习Harness？</h2>
+  <div class="step-list" style="margin-top:20px;">
+    <li><span class="step-num">1</span><div><b>注册账号</b>：访问harness.io，免费试用</div></li>
+    <li><span class="step-num">2</span><div><b>连接代码仓库</b>：支持GitHub/GitLab/Bitbucket</div></li>
+    <li><span class="step-num">3</span><div><b>创建第一个Pipeline</b>：让AI帮你生成配置</div></li>
+    <li><span class="step-num">4</span><div><b>体验AI Agent</b>：触发一次部署，看AI如何工作</div></li>
+    <li><span class="step-num">5</span><div><b>深入学习</b>：学习每个Agent的高级功能</div></li>
+  </div>
+  <div class="highlight-box" style="margin-top:25px;">
+    <p style="font-size:1.1em;">
+      💡 <b>最佳实践</b>：先用AI Agent做简单任务，逐步信任后再让它处理复杂场景
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 16: 结束页 ==================== -->
+<div class="slide full-center" id="slide-16">
+  <div class="slide-bg-glow glow-purple"></div>
+  <div class="slide-bg-glow glow-orange"></div>
+  <div class="slide-bg-glow glow-blue"></div>
+  <p style="font-size:1.1em; color:var(--accent-purple); letter-spacing:3px; margin-bottom:20px;">VIBE CODING 微课堂</p>
+  <h1 style="font-size:3.5em; background:var(--gradient-purple); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+    Harness<br>你的虚拟工程团队
+  </h1>
+  <p style="margin-top:30px; font-size:1.3em; color:var(--text-secondary);">
+    用AI Agent，让软件开发更简单
+  </p>
+  <div style="margin-top:50px; color:var(--text-secondary); font-size:0.95em;">
+    <p>感谢大家！有问题随时交流 💬</p>
+    <p style="margin-top:10px; color:var(--accent-purple);">记住：最好的AI工具，是能像团队一样工作的AI</p>
+  </div>
+</div>
+
+<!-- ==================== 导航控件 ==================== -->
+<div class="slide-number" id="slideNumber">1 / 16</div>
+<div class="progress-bar" id="progressBar" style="width: 0%"></div>
+<div class="nav-hint">← → 方向键翻页 ｜ F 全屏</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slideNumber').textContent = (current + 1) + ' / ' + slides.length;
+    document.getElementById('progressBar').style.width = ((current + 1) / slides.length * 100) + '%';
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); showSlide(current + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); showSlide(current - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); showSlide(0); }
+    else if (e.key === 'End') { e.preventDefault(); showSlide(slides.length - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? showSlide(current + 1) : showSlide(current - 1); }
+  });
+
+  document.addEventListener('click', (e) => {
+    const x = e.clientX / window.innerWidth;
+    if (x > 0.75) showSlide(current + 1);
+    else if (x < 0.25) showSlide(current - 1);
+  });
+
+  showSlide(0);
+</script>
+</body>
+</html>

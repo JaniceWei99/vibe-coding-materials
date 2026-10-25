@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness：从代码到上线的自动化之路</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Fira+Code:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-card: #1a2332;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-green: #10b981;
+    --accent-orange: #f59e0b;
+    --accent-pink: #ec4899;
+    --accent-red: #ef4444;
+    --accent-cyan: #06b6d4;
+    --accent-amber: #f59e0b;
+    --gradient-main: linear-gradient(135deg, #f59e0b, #ef4444);
+    --gradient-cool: linear-gradient(135deg, #3b82f6, #06b6d4);
+    --gradient-warm: linear-gradient(135deg, #f59e0b, #ec4899);
+    --gradient-fire: linear-gradient(135deg, #ef4444, #f59e0b);
+  }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .slide {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    padding: 60px 80px;
+    position: relative;
+    animation: fadeIn 0.4s ease;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-number { position: fixed; bottom: 20px; right: 30px; font-size: 14px; color: var(--text-secondary); font-family: 'Fira Code', monospace; z-index: 100; }
+  .progress-bar { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--gradient-main); transition: width 0.4s ease; z-index: 100; }
+  .nav-hint { position: fixed; bottom: 20px; left: 30px; font-size: 13px; color: var(--text-secondary); opacity: 0.5; z-index: 100; }
+
+  .section-tag { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; margin-bottom: 20px; letter-spacing: 1px; }
+  .tag-lecture { background: rgba(59,130,246,0.15); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.3); }
+  .tag-demo { background: rgba(139,92,246,0.15); color: var(--accent-purple); border: 1px solid rgba(139,92,246,0.3); }
+  .tag-practice { background: rgba(16,185,129,0.15); color: var(--accent-green); border: 1px solid rgba(16,185,129,0.3); }
+  .tag-summary { background: rgba(245,158,11,0.15); color: var(--accent-orange); border: 1px solid rgba(245,158,11,0.3); }
+  .tag-story { background: rgba(239,68,68,0.15); color: var(--accent-red); border: 1px solid rgba(239,68,68,0.3); }
+
+  h1 { font-size: 3.2em; font-weight: 900; line-height: 1.2; margin-bottom: 20px; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  h1.cool-gradient { background: var(--gradient-cool); -webkit-background-clip: text; background-clip: text; }
+  h1.warm-gradient { background: var(--gradient-warm); -webkit-background-clip: text; background-clip: text; }
+  h1.fire-gradient { background: var(--gradient-fire); -webkit-background-clip: text; background-clip: text; }
+  h2 { font-size: 2.2em; font-weight: 700; margin-bottom: 16px; }
+  h3 { font-size: 1.5em; font-weight: 500; color: var(--text-secondary); margin-bottom: 30px; }
+  .subtitle { font-size: 1.4em; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.6; }
+  .big-emoji { font-size: 4em; margin-bottom: 20px; }
+
+  .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; max-width: 1100px; margin-top: 10px; }
+  .content-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
+  .content-grid.four-col { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .card { background: var(--bg-card); border-radius: 16px; padding: 28px; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s, box-shadow 0.2s; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+  .card .card-icon { font-size: 2em; margin-bottom: 12px; }
+  .card h4 { font-size: 1.15em; font-weight: 700; margin-bottom: 10px; }
+  .card p, .card li { font-size: 0.95em; color: var(--text-secondary); line-height: 1.7; }
+
+  .code-block { background: #1e293b; border-radius: 12px; padding: 24px 28px; font-family: 'Fira Code', monospace; font-size: 0.95em; line-height: 1.8; border: 1px solid rgba(255,255,255,0.06); max-width: 800px; width: 100%; margin: 15px 0; overflow-x: auto; white-space: pre; }
+  .code-block .comment { color: #6b7280; }
+  .code-block .keyword { color: #c084fc; }
+  .code-block .string { color: #34d399; }
+  .code-block .function { color: #60a5fa; }
+  .code-block .value { color: #fbbf24; }
+  .code-block .bad { color: #ef4444; text-decoration: line-through; opacity: 0.7; }
+  .code-block .good { color: #10b981; }
+
+  .highlight-box { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1)); border: 1px solid rgba(245,158,11,0.2); border-radius: 16px; padding: 30px 40px; max-width: 800px; margin: 15px 0; }
+  .highlight-box.blue { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(6,182,212,0.1)); border-color: rgba(59,130,246,0.2); }
+
+  .step-list { list-style: none; max-width: 800px; width: 100%; }
+  .step-list li { display: flex; align-items: flex-start; margin-bottom: 18px; font-size: 1.15em; line-height: 1.5; }
+  .step-list .step-num { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border-radius: 50%; background: var(--gradient-main); color: white; font-weight: 700; font-size: 0.85em; margin-right: 16px; flex-shrink: 0; }
+
+  .vs-container { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: stretch; max-width: 950px; width: 100%; }
+  .vs-divider { font-size: 2em; font-weight: 900; display: flex; align-items: center; background: var(--gradient-warm); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  .quote-box { background: var(--bg-card); border-left: 4px solid var(--accent-orange); border-radius: 0 12px 12px 0; padding: 30px 40px; max-width: 800px; margin: 20px 0; }
+  .quote-box .quote-text { font-size: 1.25em; font-style: italic; line-height: 1.6; }
+  .quote-box .quote-author { margin-top: 15px; font-size: 1em; color: var(--accent-orange); font-weight: 500; }
+
+  .practice-box { background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.08)); border: 2px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 35px 45px; max-width: 850px; width: 100%; }
+  .practice-box h4 { color: var(--accent-green); font-size: 1.3em; margin-bottom: 15px; }
+  .practice-box p, .practice-box li { font-size: 1.05em; line-height: 1.7; color: var(--text-primary); }
+  .practice-box ul { padding-left: 20px; margin-top: 10px; }
+  .practice-box li { margin-bottom: 8px; }
+
+  .full-center { text-align: center; }
+  .emoji-list { list-style: none; max-width: 800px; }
+  .emoji-list li { font-size: 1.15em; margin-bottom: 14px; line-height: 1.5; padding-left: 5px; }
+
+  .table-simple { border-collapse: collapse; max-width: 900px; width: 100%; margin: 15px 0; }
+  .table-simple th, .table-simple td { padding: 14px 20px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 1em; }
+  .table-simple th { color: var(--accent-orange); font-weight: 600; }
+  .table-simple td { color: var(--text-secondary); }
+
+  .pipeline-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 900px; margin: 15px 0; }
+  .pipeline-stage { padding: 14px 22px; border-radius: 12px; font-weight: 600; font-size: 0.95em; text-align: center; min-width: 100px; }
+  .pipeline-arrow { color: var(--text-secondary); font-size: 1.5em; }
+
+  .timeline { width: 100%; max-width: 900px; position: relative; padding-left: 40px; }
+  .timeline::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--accent-orange), var(--accent-red), var(--accent-pink)); }
+  .timeline-item { position: relative; margin-bottom: 22px; padding-left: 30px; }
+  .timeline-item::before { content: ''; position: absolute; left: -32px; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-orange); border: 2px solid var(--bg-primary); box-shadow: 0 0 10px rgba(245,158,11,0.5); }
+  .timeline-item .year { font-family: 'Fira Code', monospace; font-size: 0.9em; color: var(--accent-orange); font-weight: 500; }
+  .timeline-item .event { font-size: 1.05em; color: var(--text-primary); margin-top: 2px; }
+  .timeline-item .detail { font-size: 0.9em; color: var(--text-secondary); margin-top: 2px; }
+
+  .slide-bg-glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; filter: blur(120px); opacity: 0.07; pointer-events: none; }
+  .glow-orange { background: var(--accent-orange); top: -100px; right: -100px; }
+  .glow-red { background: var(--accent-red); bottom: -100px; left: -100px; }
+  .glow-blue { background: var(--accent-blue); top: -100px; left: -100px; }
+  .glow-cyan { background: var(--accent-cyan); bottom: -100px; right: -100px; }
+
+  @media (max-width: 768px) {
+    .slide { padding: 30px 25px; }
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.5em; }
+    .content-grid, .content-grid.three-col, .content-grid.four-col { grid-template-columns: 1fr; }
+    .vs-container { grid-template-columns: 1fr; }
+    .card { padding: 20px; }
+    .pipeline-flow { flex-direction: column; align-items: stretch; }
+    .pipeline-arrow { transform: rotate(90deg); text-align: center; }
+  }
+  @media print {
+    .slide { display: flex !important; page-break-after: always; height: auto; min-height: 100vh; }
+    .nav-hint, .slide-number, .progress-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== SLIDE 1: 封面 ==================== -->
+<div class="slide active full-center" id="slide-1">
+  <div class="slide-bg-glow glow-orange"></div>
+  <div class="slide-bg-glow glow-red"></div>
+  <p style="font-size:1.1em; color:var(--accent-orange); letter-spacing:3px; margin-bottom:30px;">VIBE CODING 微课堂 · 番外篇</p>
+  <h1 style="font-size:3.5em;">Harness<br>从代码到上线的自动化之路</h1>
+  <h3 style="margin-top:10px;">写完代码之后，发生了什么？</h3>
+  <div style="margin-top:50px; color:var(--text-secondary); font-size:0.95em;">
+    <p>按 <kbd style="background:var(--bg-card);padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);">→</kbd> 开始 · 按 <kbd style="background:var(--bg-card);padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);">←</kbd> 后退</p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 2: 引入问题 ==================== -->
+<div class="slide full-center" id="slide-2">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <div class="big-emoji">🤔</div>
+  <h1 class="fire-gradient">一个灵魂拷问</h1>
+  <div style="max-width:700px; margin-top:20px;">
+    <p style="font-size:1.4em; line-height:1.8; color:var(--text-secondary);">
+      你用Vibe Coding做了一个很棒的Web应用。<br>
+      现在你想让<b style="color:var(--text-primary);">全世界的人</b>都能用到它。<br><br>
+      <span style="color:var(--accent-orange); font-size:1.1em;">怎么办？总不能让每个人都到你电脑上来看吧？😂</span>
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 3: 从代码到用户 ==================== -->
+<div class="slide" id="slide-3">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>从代码到用户，中间隔了什么？</h2>
+  <div class="pipeline-flow" style="margin-top:30px; justify-content:center;">
+    <div class="pipeline-stage" style="background:rgba(59,130,246,0.15); color:var(--accent-blue); border:1px solid rgba(59,130,246,0.3);">✏️ 写代码</div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-stage" style="background:rgba(139,92,246,0.15); color:var(--accent-purple); border:1px solid rgba(139,92,246,0.3);">🧪 测试</div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-stage" style="background:rgba(245,158,11,0.15); color:var(--accent-orange); border:1px solid rgba(245,158,11,0.3);">📦 打包</div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-stage" style="background:rgba(16,185,129,0.15); color:var(--accent-green); border:1px solid rgba(16,185,129,0.3);">🚀 部署</div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-stage" style="background:rgba(236,72,153,0.15); color:var(--accent-pink); border:1px solid rgba(236,72,153,0.3);">👥 用户使用</div>
+  </div>
+  <p style="margin-top:35px; font-size:1.15em; color:var(--text-secondary); max-width:700px; text-align:center;">
+    写代码只是第一步。<br>
+    <b style="color:var(--text-primary);">测试 → 打包 → 部署</b> 这些步骤，<br>
+    如果每次都<b style="color:var(--accent-red);">手动做</b>……
+  </p>
+</div>
+
+<!-- ==================== SLIDE 4: 手动部署的噩梦 ==================== -->
+<div class="slide" id="slide-4">
+  <span class="section-tag tag-story">😱 故事时间</span>
+  <h2>手动部署的噩梦</h2>
+  <div style="max-width:750px; margin-top:20px;">
+    <div class="card" style="margin-bottom:15px; border-color:rgba(239,68,68,0.3);">
+      <h4 style="color:var(--accent-red);">场景：小王的周五下午</h4>
+      <div style="margin-top:10px; line-height:2; color:var(--text-secondary);">
+        <p>📝 15:00 — 改了一个小Bug，准备上线</p>
+        <p>📦 15:30 — 手动打包，上传到服务器</p>
+        <p>💥 15:45 — 上线后发现：<b style="color:var(--accent-red);">首页白屏了！</b></p>
+        <p>🔍 16:00 — 排查发现：忘了跑测试，有个依赖没装</p>
+        <p>🔙 16:30 — 手动回滚到旧版本</p>
+        <p>😭 17:00 — 本该下班的小王，还在加班修Bug</p>
+        <p>🍺 20:00 — 终于修好了。小王发誓：<b style="color:var(--accent-orange);">"我再也不手动部署了！"</b></p>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:10px; font-size:1.1em; color:var(--accent-orange);">
+    这个故事每天都在无数公司里上演……除非你有 <b>CI/CD</b>。
+  </p>
+</div>
+
+<!-- ==================== SLIDE 5: 什么是CI/CD ==================== -->
+<div class="slide" id="slide-5">
+  <div class="slide-bg-glow glow-blue"></div>
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h1 class="cool-gradient">什么是 CI/CD？</h1>
+  <div class="content-grid" style="margin-top:15px;">
+    <div class="card" style="border-color:rgba(59,130,246,0.3);">
+      <div class="card-icon">🔄</div>
+      <h4 style="color:var(--accent-blue);">CI — 持续集成</h4>
+      <h4 style="font-size:0.9em; color:var(--text-secondary); font-weight:400;">Continuous Integration</h4>
+      <p style="margin-top:12px;">每次你提交代码（git push），系统<b>自动</b>执行：</p>
+      <ul style="padding-left:18px; margin-top:8px;">
+        <li>自动编译代码</li>
+        <li>自动跑测试</li>
+        <li>自动检查代码质量</li>
+        <li>有问题？<b>立刻通知你</b></li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:rgba(16,185,129,0.3);">
+      <div class="card-icon">🚀</div>
+      <h4 style="color:var(--accent-green);">CD — 持续部署</h4>
+      <h4 style="font-size:0.9em; color:var(--text-secondary); font-weight:400;">Continuous Deployment</h4>
+      <p style="margin-top:12px;">测试全通过后，系统<b>自动</b>执行：</p>
+      <ul style="padding-left:18px; margin-top:8px;">
+        <li>自动打包应用</li>
+        <li>自动部署到服务器</li>
+        <li>自动更新线上版本</li>
+        <li>有问题？<b>自动回滚</b></li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:20px; font-size:1.15em; color:var(--accent-orange);">
+    一句话：<b>你只管写代码和git push，剩下的全自动。</b>
+  </p>
+</div>
+
+<!-- ==================== SLIDE 6: 生活类比 ==================== -->
+<div class="slide full-center" id="slide-6">
+  <div class="big-emoji">🏭</div>
+  <h2>用生活来理解CI/CD</h2>
+  <div style="max-width:750px; margin-top:25px; text-align:left;">
+    <div style="margin-bottom:25px;">
+      <p style="font-size:1.2em;"><b>🍔 想象你开了一家汉堡店：</b></p>
+    </div>
+    <div style="margin-bottom:18px;">
+      <p><span style="color:var(--accent-red);">❌ 没有CI/CD</span>：每次客人点餐，你亲自去买菜、洗菜、切菜、做饼、烤肉、组装、端上桌……</p>
+      <p style="color:var(--text-secondary); margin-left:30px;">→ 累死，还容易出错（盐放多了、肉烤糊了）</p>
+    </div>
+    <div style="margin-bottom:18px;">
+      <p><span style="color:var(--accent-green);">✅ 有CI/CD</span>：你设计好菜单和配方，<b>流水线自动运转</b>：</p>
+      <p style="color:var(--text-secondary); margin-left:30px;">→ 原料自动检查质量（CI：测试）</p>
+      <p style="color:var(--text-secondary); margin-left:30px;">→ 按标准流程自动制作（CD：打包+部署）</p>
+      <p style="color:var(--text-secondary); margin-left:30px;">→ 成品自动送到客人手里（上线）</p>
+    </div>
+    <div>
+      <p style="color:var(--accent-orange); font-size:1.1em;">
+        你只需要：<b>设计新菜品</b>（写代码）+ <b>把配方放上流水线</b>（git push）
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 7: Harness登场 ==================== -->
+<div class="slide full-center" id="slide-7">
+  <div class="slide-bg-glow glow-orange"></div>
+  <div class="slide-bg-glow glow-red"></div>
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <div style="font-size:3.5em; margin-bottom:15px;">🔶</div>
+  <h1 style="font-size:3.5em;">Harness</h1>
+  <h3 style="margin-top:0;">现代化的CI/CD平台</h3>
+  <p style="font-size:1.2em; color:var(--text-secondary); max-width:600px; margin-top:10px;">
+    如果CI/CD是"自动化流水线"的理念，<br>
+    那 <b style="color:var(--accent-orange);">Harness</b> 就是帮你<b>搭建和管理这条流水线</b>的工具。
+  </p>
+</div>
+
+<!-- ==================== SLIDE 8: Harness是什么 ==================== -->
+<div class="slide" id="slide-8">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>Harness到底是什么？</h2>
+  <div class="content-grid" style="margin-top:15px;">
+    <div>
+      <table class="table-simple">
+        <tr><th>特性</th><th>说明</th></tr>
+        <tr><td>🏢 公司</td><td>Harness Inc.（美国，2017年成立）</td></tr>
+        <tr><td>💡 定位</td><td>现代软件交付平台</td></tr>
+        <tr><td>🤖 特色</td><td><b>AI驱动</b>的CI/CD</td></tr>
+        <tr><td>☁️ 部署</td><td>云端SaaS / 私有化部署</td></tr>
+        <tr><td>💰 价格</td><td>有免费版（个人/小团队够用）</td></tr>
+        <tr><td>🌐 用户</td><td>全球数千家企业使用</td></tr>
+      </table>
+    </div>
+    <div class="card" style="border-color:rgba(245,158,11,0.3);">
+      <h4 style="color:var(--accent-orange);">Harness的核心能力</h4>
+      <ul style="padding-left:18px; margin-top:12px;">
+        <li>🔄 <b>CI</b> — 持续集成（自动构建+测试）</li>
+        <li>🚀 <b>CD</b> — 持续部署（自动发布上线）</li>
+        <li>🏁 <b>Feature Flags</b> — 功能开关</li>
+        <li>☁️ <b>Cloud Cost</b> — 云成本管理</li>
+        <li>🔒 <b>Security</b> — 安全扫描</li>
+        <li>🧠 <b>AIDA</b> — AI助手（帮你写Pipeline）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 9: 为什么是Harness ==================== -->
+<div class="slide" id="slide-9">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>CI/CD工具那么多，为什么讲Harness？</h2>
+  <div class="content-grid three-col" style="margin-top:20px;">
+    <div class="card" style="text-align:center; opacity:0.6;">
+      <div class="card-icon">🔧</div>
+      <h4>Jenkins</h4>
+      <p>老牌开源CI/CD<br>功能强但<b>配置复杂</b><br>像手动挡老爷车</p>
+    </div>
+    <div class="card" style="text-align:center; opacity:0.6;">
+      <div class="card-icon">🦊</div>
+      <h4>GitLab CI</h4>
+      <p>和GitLab深度绑定<br>够用但<b>扩展性有限</b><br>像自带导航的家用车</p>
+    </div>
+    <div class="card" style="text-align:center; border-color:rgba(245,158,11,0.4);">
+      <div class="card-icon">🔶</div>
+      <h4 style="color:var(--accent-orange);">Harness</h4>
+      <p>现代化、AI驱动<br><b>可视化Pipeline</b><br>像自动驾驶的特斯拉 🚗</p>
+      <p style="margin-top:8px; color:var(--accent-orange); font-weight:600;">← 我们今天讲这个</p>
+    </div>
+  </div>
+  <p style="margin-top:20px; font-size:1.05em; color:var(--text-secondary);">
+    Harness代表了CI/CD的<b>未来方向</b>：AI辅助、可视化、开发者友好。
+  </p>
+</div>
+
+<!-- ==================== SLIDE 10: 核心概念 ==================== -->
+<div class="slide" id="slide-10">
+  <div class="slide-bg-glow glow-orange"></div>
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>Harness的核心概念（超简版）</h2>
+  <div style="max-width:850px; margin-top:20px;">
+    <div class="pipeline-flow" style="justify-content:center; margin-bottom:30px;">
+      <div class="pipeline-stage" style="background:rgba(245,158,11,0.2); color:var(--accent-orange); border:2px solid rgba(245,158,11,0.4);">🏗️ Pipeline<br><span style="font-size:0.8em;">流水线</span></div>
+      <div class="pipeline-arrow">⊃</div>
+      <div class="pipeline-stage" style="background:rgba(59,130,246,0.15); color:var(--accent-blue); border:1px solid rgba(59,130,246,0.3);">📋 Stage<br><span style="font-size:0.8em;">阶段</span></div>
+      <div class="pipeline-arrow">⊃</div>
+      <div class="pipeline-stage" style="background:rgba(139,92,246,0.15); color:var(--accent-purple); border:1px solid rgba(139,92,246,0.3);">⚙️ Step<br><span style="font-size:0.8em;">步骤</span></div>
+    </div>
+    <div class="content-grid three-col">
+      <div class="card">
+        <h4 style="color:var(--accent-orange);">Pipeline（流水线）</h4>
+        <p>整个自动化流程。<br>类比：一条<b>完整的生产线</b></p>
+        <p style="margin-top:8px; font-size:0.85em; color:var(--accent-orange);">例：从代码到上线的全过程</p>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--accent-blue);">Stage（阶段）</h4>
+        <p>流水线中的一个大环节。<br>类比：生产线上的一个<b>工作站</b></p>
+        <p style="margin-top:8px; font-size:0.85em; color:var(--accent-blue);">例：构建阶段、测试阶段、部署阶段</p>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--accent-purple);">Step（步骤）</h4>
+        <p>阶段中的一个具体操作。<br>类比：工作站上的一个<b>动作</b></p>
+        <p style="margin-top:8px; font-size:0.85em; color:var(--accent-purple);">例：运行npm install、执行测试脚本</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 11: 真实例子 ==================== -->
+<div class="slide" id="slide-11">
+  <span class="section-tag tag-demo">🖥️ 实例</span>
+  <h2>一个真实的Pipeline长什么样？</h2>
+  <p style="color:var(--text-secondary); margin-bottom:15px;">假设你用Vibe Coding做了一个待办事项App，想自动化上线：</p>
+  <div class="code-block" style="font-size:0.9em; max-width:850px;">
+<span class="comment"># Harness Pipeline 配置（简化版）</span>
+
+<span class="keyword">pipeline:</span>
+  <span class="keyword">name:</span> <span class="string">"我的待办App - 自动上线"</span>
+  
+  <span class="keyword">stages:</span>
+    - <span class="keyword">stage:</span> <span class="string">构建 & 测试</span>         <span class="comment"># Stage 1</span>
+      <span class="keyword">steps:</span>
+        - <span class="function">拉取最新代码</span>              <span class="comment"># Step: git pull</span>
+        - <span class="function">安装依赖</span>                  <span class="comment"># Step: npm install</span>
+        - <span class="function">运行测试</span>                  <span class="comment"># Step: npm test</span>
+        - <span class="function">构建生产版本</span>              <span class="comment"># Step: npm run build</span>
+
+    - <span class="keyword">stage:</span> <span class="string">部署到服务器</span>        <span class="comment"># Stage 2</span>
+      <span class="keyword">steps:</span>
+        - <span class="function">上传到云服务器</span>            <span class="comment"># Step: 部署到AWS/阿里云</span>
+        - <span class="function">健康检查</span>                  <span class="comment"># Step: 确认网站正常</span>
+        - <span class="function">通知团队</span>                  <span class="comment"># Step: 发消息到钉钉/飞书</span>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 12: 可视化Pipeline ==================== -->
+<div class="slide" id="slide-12">
+  <span class="section-tag tag-demo">🖥️ 实例</span>
+  <h2>Harness的杀手锏：可视化Pipeline</h2>
+  <div style="max-width:850px; margin-top:15px;">
+    <div class="card" style="padding:30px; border-color:rgba(245,158,11,0.3);">
+      <p style="text-align:center; color:var(--accent-orange); margin-bottom:15px; font-weight:600;">Pipeline可视化编辑器（示意）</p>
+      <div class="pipeline-flow" style="justify-content:center;">
+        <div style="text-align:center;">
+          <div class="pipeline-stage" style="background:rgba(59,130,246,0.2); color:var(--accent-blue); border:2px solid var(--accent-blue);">📥 拉取代码</div>
+          <div style="color:var(--accent-green); font-size:0.8em; margin-top:4px;">✅ 3s</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div style="text-align:center;">
+          <div class="pipeline-stage" style="background:rgba(139,92,246,0.2); color:var(--accent-purple); border:2px solid var(--accent-purple);">🧪 运行测试</div>
+          <div style="color:var(--accent-green); font-size:0.8em; margin-top:4px;">✅ 12s</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div style="text-align:center;">
+          <div class="pipeline-stage" style="background:rgba(245,158,11,0.2); color:var(--accent-orange); border:2px solid var(--accent-orange);">📦 构建打包</div>
+          <div style="color:var(--accent-green); font-size:0.8em; margin-top:4px;">✅ 45s</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div style="text-align:center;">
+          <div class="pipeline-stage" style="background:rgba(16,185,129,0.2); color:var(--accent-green); border:2px solid var(--accent-green);">🚀 部署上线</div>
+          <div style="color:var(--accent-green); font-size:0.8em; margin-top:4px;">✅ 20s</div>
+        </div>
+      </div>
+      <p style="text-align:center; margin-top:15px; color:var(--accent-green); font-size:1.1em;">
+        ✅ Pipeline执行成功 · 总耗时 1分20秒
+      </p>
+    </div>
+    <p style="margin-top:15px; color:var(--text-secondary); font-size:1.05em; text-align:center;">
+      不需要写复杂配置——<b>拖拖拽拽</b>就能搭建Pipeline！<br>
+      而且Harness还有 <b style="color:var(--accent-orange);">AIDA（AI助手）</b> 帮你自动生成Pipeline。
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 13: Trigger ==================== -->
+<div class="slide" id="slide-13">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>Trigger：什么时候自动触发？</h2>
+  <div class="content-grid" style="margin-top:15px;">
+    <div class="card">
+      <div class="card-icon">📨</div>
+      <h4>代码推送触发</h4>
+      <p>你 <code style="background:var(--bg-secondary);padding:2px 6px;border-radius:4px;">git push</code> 到主分支 → Pipeline自动运行</p>
+      <p style="margin-top:8px; color:var(--accent-blue); font-size:0.9em;">最常见的触发方式</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔀</div>
+      <h4>PR合并触发</h4>
+      <p>Pull Request被合并 → 自动构建+部署</p>
+      <p style="margin-top:8px; color:var(--accent-purple); font-size:0.9em;">团队协作最佳实践</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⏰</div>
+      <h4>定时触发</h4>
+      <p>每天凌晨2点自动跑测试 → 第二天上班看结果</p>
+      <p style="margin-top:8px; color:var(--accent-green); font-size:0.9em;">适合跑耗时长的测试</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🖱️</div>
+      <h4>手动触发</h4>
+      <p>点一个按钮 → 一键部署</p>
+      <p style="margin-top:8px; color:var(--accent-orange); font-size:0.9em;">重要发布时使用</p>
+    </div>
+  </div>
+  <p style="margin-top:20px; font-size:1.05em; color:var(--text-secondary);">
+    💡 类比：<b>闹钟</b>（定时触发）vs <b>门铃</b>（事件触发）vs <b>遥控器</b>（手动触发）
+  </p>
+</div>
+
+<!-- ==================== SLIDE 14: Feature Flags ==================== -->
+<div class="slide" id="slide-14">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>🏁 Feature Flags：功能开关</h2>
+  <p style="color:var(--text-secondary); margin-bottom:15px;">Harness另一个酷炫的功能</p>
+  <div class="vs-container">
+    <div class="card" style="border-color:rgba(239,68,68,0.3);">
+      <h4 style="color:var(--accent-red);">❌ 没有Feature Flags</h4>
+      <p style="margin-top:10px;">新功能写完了→直接上线→<b>所有用户</b>立刻看到</p>
+      <p style="margin-top:8px;">万一有Bug？→ 所有人都受影响 💥</p>
+      <p style="margin-top:8px;">想回滚？→ 重新部署，可能要好几分钟</p>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div class="card" style="border-color:rgba(16,185,129,0.3);">
+      <h4 style="color:var(--accent-green);">✅ 有Feature Flags</h4>
+      <p style="margin-top:10px;">新功能写完了→上线但<b>默认关闭</b></p>
+      <p style="margin-top:8px;">先给10%的用户试用→没问题→开给所有人</p>
+      <p style="margin-top:8px;">有Bug？→ <b>一秒关闭</b>，不需要重新部署！</p>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:20px; text-align:center; max-width:950px;">
+    <p style="font-size:1.1em;">
+      🎮 就像游戏里的<b>技能开关</b>：功能已经部署了，但你可以随时开/关，还可以选择对谁开放。
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 15: Feature Flags例子 ==================== -->
+<div class="slide" id="slide-15">
+  <span class="section-tag tag-story">📖 举个栗子</span>
+  <h2>Feature Flags的真实场景</h2>
+  <div class="content-grid" style="margin-top:15px;">
+    <div class="card">
+      <div class="card-icon">🛒</div>
+      <h4>电商App新结账流程</h4>
+      <p>重新设计了结账页面，但不确定用户喜不喜欢。</p>
+      <p style="margin-top:8px; color:var(--accent-green);">→ 先开给<b>5%的用户</b>，观察转化率</p>
+      <p style="color:var(--accent-green);">→ 数据好？→ 扩大到100%</p>
+      <p style="color:var(--accent-red);">→ 数据差？→ 一键关闭，回到旧版</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎓</div>
+      <h4>你的课程表App</h4>
+      <p>加了一个"AI推荐选课"功能，但还在测试。</p>
+      <p style="margin-top:8px; color:var(--accent-green);">→ 只对<b>自己和室友</b>开放测试</p>
+      <p style="color:var(--accent-green);">→ 确认OK后 → 开放给全班</p>
+      <p style="color:var(--accent-green);">→ 再开放给 → 全校</p>
+    </div>
+  </div>
+  <p style="margin-top:20px; font-size:1.1em; color:var(--accent-orange); text-align:center;">
+    Feature Flags = <b>让发布不再是"赌博"</b> 🎲
+  </p>
+</div>
+
+<!-- ==================== SLIDE 16: AIDA ==================== -->
+<div class="slide full-center" id="slide-16">
+  <div class="slide-bg-glow glow-orange"></div>
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <div class="big-emoji">🤖</div>
+  <h1 class="warm-gradient">AIDA：Harness的AI助手</h1>
+  <div style="max-width:700px; margin-top:15px;">
+    <p style="font-size:1.15em; color:var(--text-secondary); line-height:1.7;">
+      还记得Vibe Coding吗？Harness把同样的理念带到了DevOps领域：<br><br>
+      <b style="color:var(--text-primary);">你用自然语言描述你想要的Pipeline，<br>AIDA帮你自动生成。</b>
+    </p>
+  </div>
+  <div class="code-block" style="margin-top:20px; font-size:0.95em;">
+<span class="comment">// 你对AIDA说：</span>
+<span class="string">"帮我创建一个Pipeline：当代码push到main分支时，
+自动安装依赖、跑测试、构建Docker镜像、
+部署到Kubernetes集群"</span>
+
+<span class="comment">// AIDA自动帮你生成完整的Pipeline配置 ✨</span>
+  </div>
+  <p style="margin-top:15px; color:var(--accent-orange); font-size:1.05em;">
+    Vibe Coding + Vibe DevOps = <b>全栈自动化</b> 🚀
+  </p>
+</div>
+
+<!-- ==================== SLIDE 17: Git到Harness的完整链路 ==================== -->
+<div class="slide" id="slide-17">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>完整的现代开发链路</h2>
+  <p style="color:var(--text-secondary); margin-bottom:15px;">把前面学的串起来，你就拥有了完整的开发工作流：</p>
+  <div style="max-width:900px;">
+    <div class="pipeline-flow" style="justify-content:center; margin-bottom:25px;">
+      <div class="pipeline-stage" style="background:rgba(139,92,246,0.15); color:var(--accent-purple); border:1px solid rgba(139,92,246,0.3);">💡 想法</div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-stage" style="background:rgba(59,130,246,0.15); color:var(--accent-blue); border:1px solid rgba(59,130,246,0.3);">🤖 Vibe Coding<br><span style="font-size:0.75em;">(TRAE)</span></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-stage" style="background:rgba(16,185,129,0.15); color:var(--accent-green); border:1px solid rgba(16,185,129,0.3);">📸 Git Commit</div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-stage" style="background:rgba(245,158,11,0.2); color:var(--accent-orange); border:2px solid rgba(245,158,11,0.4);">🔶 Harness<br><span style="font-size:0.75em;">CI/CD Pipeline</span></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-stage" style="background:rgba(236,72,153,0.15); color:var(--accent-pink); border:1px solid rgba(236,72,153,0.3);">🌍 用户使用</div>
+    </div>
+    <div class="content-grid">
+      <div class="card">
+        <h4>你负责的</h4>
+        <ul style="padding-left:18px; margin-top:8px;">
+          <li>想法 → 用AI写代码</li>
+          <li>测试 → 提交到Git</li>
+          <li><b>这就是你的全部工作</b></li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:rgba(245,158,11,0.3);">
+        <h4 style="color:var(--accent-orange);">Harness自动做的</h4>
+        <ul style="padding-left:18px; margin-top:8px;">
+          <li>自动跑测试 → 自动构建</li>
+          <li>自动部署 → 自动监控</li>
+          <li><b>24/7不休息的机器人员工</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 18: 真实企业案例 ==================== -->
+<div class="slide" id="slide-18">
+  <span class="section-tag tag-story">📖 企业案例</span>
+  <h2>Harness在真实企业中的应用</h2>
+  <div class="content-grid three-col" style="margin-top:15px;">
+    <div class="card">
+      <div class="card-icon">🏦</div>
+      <h4>某金融公司</h4>
+      <p><b>之前</b>：每次发布需要3天，涉及20个手动步骤</p>
+      <p style="margin-top:8px;"><b>之后</b>：<span style="color:var(--accent-green);">30分钟自动完成</span>，零手动操作</p>
+      <p style="margin-top:8px; color:var(--accent-orange); font-size:0.9em;">效率提升 144倍</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎮</div>
+      <h4>某游戏公司</h4>
+      <p><b>之前</b>：每周发布1次，经常出故障</p>
+      <p style="margin-top:8px;"><b>之后</b>：<span style="color:var(--accent-green);">每天发布10+次</span>，用Feature Flags控制灰度</p>
+      <p style="margin-top:8px; color:var(--accent-orange); font-size:0.9em;">发布频率提升 70倍</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛒</div>
+      <h4>某电商平台</h4>
+      <p><b>之前</b>：部署失败后回滚需要1小时</p>
+      <p style="margin-top:8px;"><b>之后</b>：<span style="color:var(--accent-green);">自动回滚，5分钟恢复</span></p>
+      <p style="margin-top:8px; color:var(--accent-orange); font-size:0.9em;">故障恢复时间减少 92%</p>
+    </div>
+  </div>
+  <p style="margin-top:20px; color:var(--text-secondary); font-size:1.05em; text-align:center;">
+    CI/CD不是"锦上添花"，而是现代软件开发的<b>基础设施</b>。
+  </p>
+</div>
+
+<!-- ==================== SLIDE 19: 和Jenkins对比 ==================== -->
+<div class="slide" id="slide-19">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>Harness vs 传统工具（Jenkins）</h2>
+  <table class="table-simple" style="margin-top:20px; max-width:850px;">
+    <tr><th>对比维度</th><th>Jenkins（传统）</th><th style="color:var(--accent-orange);">Harness（现代）</th></tr>
+    <tr><td>🏗️ Pipeline创建</td><td>手写Groovy脚本</td><td><b>可视化拖拽 + AI生成</b></td></tr>
+    <tr><td>🖥️ 部署方式</td><td>需要自己搭服务器</td><td><b>云端SaaS，开箱即用</b></td></tr>
+    <tr><td>🔄 回滚</td><td>手动操作</td><td><b>自动回滚</b></td></tr>
+    <tr><td>📊 监控</td><td>需要额外工具</td><td><b>内置监控 + AI分析</b></td></tr>
+    <tr><td>🏁 Feature Flags</td><td>不支持</td><td><b>内置支持</b></td></tr>
+    <tr><td>🧠 AI能力</td><td>无</td><td><b>AIDA AI助手</b></td></tr>
+    <tr><td>📈 学习曲线</td><td>陡峭 🏔️</td><td><b>平缓 🛝</b></td></tr>
+  </table>
+  <p style="margin-top:15px; color:var(--text-secondary); font-size:0.95em;">
+    Jenkins像是CI/CD界的"诺基亚"——曾经的王者，但时代变了。
+  </p>
+</div>
+
+<!-- ==================== SLIDE 20: 动手体验思路 ==================== -->
+<div class="slide" id="slide-20">
+  <div class="slide-bg-glow glow-blue"></div>
+  <span class="section-tag tag-practice">🛠️ 动手思路</span>
+  <h2>如果你想亲手试试Harness</h2>
+  <ul class="step-list" style="margin-top:20px;">
+    <li>
+      <span class="step-num">1</span>
+      <div>
+        <b>注册Harness免费账号</b>：<span style="color:var(--accent-blue);">app.harness.io</span><br>
+        <span style="color:var(--text-secondary);">免费版足够个人学习使用</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">2</span>
+      <div>
+        <b>关联你的GitHub仓库</b><br>
+        <span style="color:var(--text-secondary);">把你之前用Vibe Coding做的项目推到GitHub</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">3</span>
+      <div>
+        <b>用AIDA创建第一个Pipeline</b><br>
+        <span style="color:var(--text-secondary);">对AI说："当代码推到main分支时，自动构建和测试"</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">4</span>
+      <div>
+        <b>推一次代码，看Pipeline自动跑！</b><br>
+        <span style="color:var(--text-secondary);">体验一下"git push后什么都不用管"的快感 😎</span>
+      </div>
+    </li>
+  </ul>
+  <p style="margin-top:15px; color:var(--accent-orange); font-size:1em;">
+    ⚡ 这个可以作为课后的进阶挑战！
+  </p>
+</div>
+
+<!-- ==================== SLIDE 21: DevOps全景 ==================== -->
+<div class="slide" id="slide-21">
+  <span class="section-tag tag-lecture">📖 讲授</span>
+  <h2>🗺️ 更大的图景：DevOps</h2>
+  <div style="max-width:800px; margin-top:15px;">
+    <div class="card" style="padding:30px; border-color:rgba(245,158,11,0.3);">
+      <p style="text-align:center; color:var(--accent-orange); margin-bottom:15px; font-weight:600; font-size:1.1em;">DevOps = Development + Operations</p>
+      <div class="pipeline-flow" style="justify-content:center;">
+        <div class="pipeline-stage" style="background:rgba(59,130,246,0.15); color:var(--accent-blue); border:1px solid rgba(59,130,246,0.3);">📝 计划</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-stage" style="background:rgba(139,92,246,0.15); color:var(--accent-purple); border:1px solid rgba(139,92,246,0.3);">💻 开发</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-stage" style="background:rgba(16,185,129,0.15); color:var(--accent-green); border:1px solid rgba(16,185,129,0.3);">🧪 测试</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-stage" style="background:rgba(245,158,11,0.2); color:var(--accent-orange); border:2px solid rgba(245,158,11,0.4);">🚀 发布</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-stage" style="background:rgba(236,72,153,0.15); color:var(--accent-pink); border:1px solid rgba(236,72,153,0.3);">📊 监控</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-stage" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan); border:1px solid rgba(6,182,212,0.3);">🔄 反馈</div>
+      </div>
+      <p style="text-align:center; margin-top:15px; color:var(--text-secondary);">
+        ↩️ 形成闭环，持续迭代
+      </p>
+    </div>
+    <p style="margin-top:20px; font-size:1.05em; color:var(--text-secondary); text-align:center;">
+      Harness覆盖了DevOps中<b>测试→发布→监控</b>的核心环节。<br>
+      而你前面学的Vibe Coding，覆盖了<b>开发</b>环节。<br>
+      <span style="color:var(--accent-green);">两者结合 = <b>完整的现代开发工作流</b></span>
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 22: 一个段子 ==================== -->
+<div class="slide full-center" id="slide-22">
+  <div class="big-emoji">😂</div>
+  <h2>DevOps工程师的日常</h2>
+  <div style="max-width:700px; margin-top:25px; text-align:left;">
+    <div style="margin-bottom:20px;">
+      <p style="color:var(--text-secondary);">📅 <b>没有CI/CD的团队</b>：</p>
+      <p style="color:var(--text-secondary); margin-left:20px;">"谁动了服务器？！"</p>
+      <p style="color:var(--text-secondary); margin-left:20px;">"在我电脑上是好的啊！"</p>
+      <p style="color:var(--text-secondary); margin-left:20px;">"别发布了，今天周五。"</p>
+      <p style="color:var(--text-secondary); margin-left:20px;">"凌晨3点发布，影响最小。" 😴</p>
+    </div>
+    <div>
+      <p style="color:var(--accent-green);">📅 <b>有Harness的团队</b>：</p>
+      <p style="color:var(--accent-green); margin-left:20px;">"代码合并了？Pipeline自动跑。"</p>
+      <p style="color:var(--accent-green); margin-left:20px;">"测试全绿？自动上线。"</p>
+      <p style="color:var(--accent-green); margin-left:20px;">"有Bug？Feature Flag一键关闭。"</p>
+      <p style="color:var(--accent-green); margin-left:20px;">"周五发布？随便发，反正能秒回滚。" 😎</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 23: 总结 ==================== -->
+<div class="slide full-center" id="slide-23">
+  <span class="section-tag tag-summary">📝 总结</span>
+  <h1 class="warm-gradient">今天的收获</h1>
+  <div style="max-width:700px; text-align:left; margin-top:25px;">
+    <ul class="emoji-list">
+      <li>✅ <b>CI/CD</b>：代码写完后的自动化流水线（测试→构建→部署）</li>
+      <li>✅ <b>Harness</b>：现代化、AI驱动的CI/CD平台</li>
+      <li>✅ <b>Pipeline</b>：流水线（包含Stage和Step）</li>
+      <li>✅ <b>Trigger</b>：什么时候自动触发Pipeline</li>
+      <li>✅ <b>Feature Flags</b>：功能开关，安全发布新功能</li>
+      <li>✅ <b>AIDA</b>：用自然语言让AI帮你搭Pipeline</li>
+      <li>✅ <b>完整链路</b>：想法→Vibe Coding→Git→Harness→用户</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 24: 寄语 ==================== -->
+<div class="slide full-center" id="slide-24">
+  <div class="slide-bg-glow glow-orange"></div>
+  <div class="slide-bg-glow glow-blue"></div>
+  <div class="quote-box" style="border-left-color:var(--accent-orange); max-width:750px;">
+    <p class="quote-text" style="font-size:1.35em;">
+      "写代码只是10%，<br>
+      把代码变成用户手中的产品，<br>
+      才是<b>另外90%的故事</b>。"
+    </p>
+  </div>
+  <p style="margin-top:30px; font-size:1.2em; color:var(--text-secondary);">
+    Vibe Coding帮你搞定第一个10%，<br>
+    Harness帮你自动化剩下的90%。
+  </p>
+  <p style="margin-top:30px; font-size:1.4em; color:var(--accent-orange);">
+    从想法到产品，你现在拥有了<b>完整的工具链</b>。🚀
+  </p>
+</div>
+
+<!-- ==================== 导航控件 ==================== -->
+<div class="slide-number" id="slideNumber">1 / 24</div>
+<div class="progress-bar" id="progressBar" style="width: 0%"></div>
+<div class="nav-hint">← → 方向键翻页 ｜ F 全屏</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slideNumber').textContent = (current + 1) + ' / ' + slides.length;
+    document.getElementById('progressBar').style.width = ((current + 1) / slides.length * 100) + '%';
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); showSlide(current + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); showSlide(current - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); showSlide(0); }
+    else if (e.key === 'End') { e.preventDefault(); showSlide(slides.length - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? showSlide(current + 1) : showSlide(current - 1); }
+  });
+
+  document.addEventListener('click', (e) => {
+    const x = e.clientX / window.innerWidth;
+    if (x > 0.75) showSlide(current + 1);
+    else if (x < 0.25) showSlide(current - 1);
+  });
+
+  showSlide(0);
+</script>
+</body>
+</html>
